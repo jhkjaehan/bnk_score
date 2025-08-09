@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Collection">
+
+    <sql id="nonpayListWhere">
+        <where>
+            <if test="taskId != null and taskId != ''">
+                AND VMC.TASK_ID = #{taskId}
+            </if>
+            <if test="callId != null and callId != ''">
+                AND MC.CALL_ID = #{callId}
+            </if>
+            /* 검색 조건 추가 */
+            <if test="startDate != null and startDate != ''">
+                AND DATE_FORMAT(MC.CALL_DT,'%Y-%m-%d') <![CDATA[ >= ]]> #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND DATE_FORMAT(MC.CALL_DT,'%Y-%m-%d') <![CDATA[ <= ]]> #{endDate}
+            </if>
+
+            <if test="wrongGuide != null and wrongGuide != ''">
+                AND IFNULL(MARI5.RESULT_VALUE,'N') = #{wrongGuide}
+            </if>
+            <if test="banned != null and banned != ''">
+                AND IFNULL(MARI6.RESULT_VALUE,'N') = #{banned}
+            </if>
+            <if test="illegal != null and illegal != ''">
+                AND IFNULL(MARI7.RESULT_VALUE,'N') = #{illegal}
+            </if>
+            <if test="paymentWill != null and paymentWill != ''">
+                AND IFNULL(MARI8.RESULT_VALUE,'N') = #{paymentWill}
+            </if>
+            <if test="counselor != null and counselor != ''">
+                AND MC.COUNSELOR_CD = #{counselor}
+            </if>
+
+        </where>
+    </sql>
+
+    <!-- resultType을 HashMap으로 지정 -->
+    <select id="selectCounselors" parameterType="hashmap" resultType="hashmap">
+        <!-- Collection.selectCounselors -->
+        SELECT
+        counselor_cd AS "counselorCd",
+        name AS "name",
+        extension_num AS "extensionNum",
+        task_name AS "taskName",
+        reg_dt AS "regDt",
+        upd_dt AS "updDt"
+        FROM mstr_counselor
+        <where>
+            <if test="counselorCd != null and counselorCd != ''">
+                AND counselor_cd = #{counselorCd}
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="taskName != null and taskName != ''">
+                AND task_name = #{taskName}
+            </if>
+        </where>
+        ORDER BY reg_dt DESC
+    </select>
+
+
+    <!-- call 상세화면 대표정보 조회 -->
+    <select id="selectMstrCallOne" parameterType="hashmap" resultType="hashmap">
+        <!-- Collection.selectMstrCallOne -->
+        SELECT DATE_FORMAT(A.CALL_DT,'%Y-%m-%d') AS "callDt"
+            , A.CUST_NUM AS "custNum"
+            , A.COUNSELOR_CD AS "counselorCd"
+            , B.NAME AS "counselorName"
+            , A.CALL_ID AS "callId"
+            , C.TASK_NAME AS "taskName"
+            , A.FILE_PATH AS "filePath"
+        FROM MSTR_CALL A
+        LEFT JOIN MSTR_COUNSELOR B
+        ON A.COUNSELOR_CD = B.COUNSELOR_CD
+        LEFT JOIN V_MSTR_CALL_TASK C
+        ON A.CALL_ID = C.CALL_ID
+        WHERE A.CALL_ID = #{callId}
+    </select>
+
+    <!-- call 목록 정보 조회 -->
+    <select id="selectMstrNonpayList" parameterType="hashmap" resultType="hashmap">
+        <!-- Collection.selectMstrNonpayList -->
+        SELECT * FROM (
+            SELECT
+                @ROWNUM := @ROWNUM + 1 AS RNUM,
+                A.*
+            FROM (
+
+            SELECT DATE_FORMAT(MC.CALL_DT,'%Y-%m-%d') AS "callDt"
+                    , MC.CUST_NUM AS "custNum"
+                    , MC.COUNSELOR_CD AS "counselorCd"
+                    , MCS.NAME AS "counselorName"
+                    , VMC.TASK_ID AS "taskId"
+                    , VMC.TASK_NAME AS "taskName"
+                    , MC.CALL_ID AS "callId"
+                    , MAS.SCORE_VALUE AS "scoreValue"
+                    , IFNULL(MARI5.RESULT_VALUE,'N') AS "item05"
+                    , IFNULL(MARI6.RESULT_VALUE,'N') AS "item06"
+                    , IFNULL(MARI7.RESULT_VALUE,'N') AS "item07"
+                    , IFNULL(MARI8.RESULT_VALUE,'N') AS "item08"
+                FROM MSTR_CALL MC
+                LEFT JOIN MSTR_COUNSELOR MCS
+                ON MC.COUNSELOR_CD = MCS.COUNSELOR_CD
+                LEFT JOIN V_MSTR_CALL_TASK VMC
+                ON MC.CALL_ID = VMC.CALL_ID
+                LEFT JOIN (
+                    SELECT CALL_ID, TASK_ID, SCORE_ID, SCORE_VALUE FROM MSTR_ANALYSIS_SCORE
+                    WHERE SCORE_ID IN
+                        (
+                            SELECT MIN(SCORE_ID) FROM MSTR_EVAL_SCORE_CONTENT
+                            GROUP BY TASK_ID
+                        )
+                ) MAS
+                ON MC.CALL_ID = MAS.CALL_ID
+                LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0005'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                ) MARI5
+                ON MC.CALL_ID = MARI5.CALL_ID
+                LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0006'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                ) MARI6
+                ON MC.CALL_ID = MARI6.CALL_ID
+                LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0007'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                ) MARI7
+                ON MC.CALL_ID = MARI7.CALL_ID
+                LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0008'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                ) MARI8
+                ON MC.CALL_ID = MARI8.CALL_ID
+            <include refid="nonpayListWhere"/>
+
+            <choose>
+                <when test="sortOrder != null and sortOrder.size() > 0">
+                    ORDER BY
+                    <foreach collection="sortOrder" item="order" separator=",">
+                        ${order.column} ${order.direction}
+                    </foreach>
+                </when>
+                <otherwise>
+                    ORDER BY callDt desc
+                </otherwise>
+            </choose>
+            ) A, (SELECT @ROWNUM := 0) R
+        ) B
+        WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+
+    </select>
+
+
+    <!-- 전체 건수 조회 -->
+    <select id="selectMstrNonpayListCount" parameterType="hashmap" resultType="int">
+        SELECT COUNT(*)
+        FROM MSTR_CALL MC
+        LEFT JOIN MSTR_COUNSELOR MCS
+        ON MC.COUNSELOR_CD = MCS.COUNSELOR_CD
+        LEFT JOIN V_MSTR_CALL_TASK VMC
+        ON MC.CALL_ID = VMC.CALL_ID
+        LEFT JOIN (
+        SELECT CALL_ID, TASK_ID, SCORE_ID, SCORE_VALUE FROM MSTR_ANALYSIS_SCORE
+        WHERE SCORE_ID IN
+        (
+        SELECT MIN(SCORE_ID) FROM MSTR_EVAL_SCORE_CONTENT
+        GROUP BY TASK_ID
+        )
+        ) MAS
+        ON MC.CALL_ID = MAS.CALL_ID
+        LEFT JOIN (
+        SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+        WHERE ITEM_ID = 'I0005'
+        AND RESULT_VALUE = 'Y'
+        GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+        ) MARI5
+        ON MC.CALL_ID = MARI5.CALL_ID
+        LEFT JOIN (
+        SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+        WHERE ITEM_ID = 'I0006'
+        AND RESULT_VALUE = 'Y'
+        GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+        ) MARI6
+        ON MC.CALL_ID = MARI6.CALL_ID
+        LEFT JOIN (
+        SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+        WHERE ITEM_ID = 'I0007'
+        AND RESULT_VALUE = 'Y'
+        GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+        ) MARI7
+        ON MC.CALL_ID = MARI7.CALL_ID
+        LEFT JOIN (
+        SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+        WHERE ITEM_ID = 'I0008'
+        AND RESULT_VALUE = 'Y'
+        GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+        ) MARI8
+        ON MC.CALL_ID = MARI8.CALL_ID
+        <include refid="nonpayListWhere"/>
+    </select>
+
+
+</mapper>

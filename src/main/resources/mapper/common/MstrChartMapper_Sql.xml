@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="MstrChart">
+
+    <select id="selectCallChartData" parameterType="hashmap" resultType="hashmap">
+    <!-- MstrChart.selectCallChartData -->
+        SELECT
+            taskId
+            , name
+            , cnt
+            , ratio
+        FROM V_MSTR_CHART_STAT
+    </select>
+
+    <select id="selectScoreChartData" parameterType="hashmap" resultType="hashmap">
+    <!-- MstrChart.selectScoreChartData -->
+        SELECT A.TASK_ID AS "taskId"
+             , A.SCORE_ID AS "scoreId"
+             , B.NAME AS "name"
+             , AVG(A.SCORE_VALUE) AS "avgScore"
+        FROM MSTR_ANALYSIS_SCORE A
+        LEFT JOIN MSTR_EVAL_SCORE_CONTENT B
+        ON A.TASK_ID = B.TASK_ID
+        AND A.SCORE_ID = B.SCORE_ID
+        <where>
+            <if test="taskId != null and taskId != ''">
+                AND A.TASK_ID = #{taskId}
+            </if>
+            <if test="taskId == 'TA0001'">
+                AND A.SCORE_ID NOT IN ('S0006')
+            </if>
+        </where>
+        GROUP BY A.TASK_ID, A.SCORE_ID
+        ORDER BY A.TASK_ID, A.SCORE_ID
+    </select>
+
+    <select id="selectProblemChartData" parameterType="hashmap" resultType="hashmap">
+    <!-- MstrChart.selectProblemChartData -->
+        SELECT TASK_ID AS "taskId"
+            , TYPE_ID AS "typeId"
+            , ITEM_ID AS "itemId"
+            , NAME AS "name"
+            , CNT AS "cnt"
+            , RATIO AS "ratio"
+        FROM V_MSTR_PROB_CALL
+        <where>
+            <if test="taskId != null and taskId != ''">
+                AND TASK_ID = #{taskId}
+            </if>
+            <if test="typeId != null and typeId != ''">
+                AND TYPE_ID = #{typeId}
+            </if>
+        </where>
+    </select>
+</mapper>

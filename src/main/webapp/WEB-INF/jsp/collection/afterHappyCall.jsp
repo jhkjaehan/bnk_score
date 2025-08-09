@@ -1,0 +1,218 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <jsp:include page="/WEB-INF/jsp/inc/head.jsp"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+  <script type="text/javascript" src="${pageContext.request.contextPath}/js/collection/afterHappyCall.js"></script>
+</head>
+<body class="bg-gray-100">
+<jsp:include page="/WEB-INF/jsp/inc/header.jsp"/>
+
+<div class="container-custom mx-auto px-4 py-4">
+  <!-- 페이지 제목 -->
+  <div class="mb-4">
+    <h1 class="text-xl font-bold text-gray-900">사후해피콜</h1>
+  </div>
+
+  <jsp:include page="/WEB-INF/jsp/inc/tabMenu.jsp"/>
+
+  <!-- CALL 리스트 탭 컨텐츠 -->
+  <div id="listTab" class="tab-content active">
+    <div class="bg-blue-50 rounded-xl shadow-lg p-4 mb-4 text-sm">
+      <h2 class="text-lg font-semibold text-black-800 mb-4">검색 조건</h2>
+      <form id="searchForm" class="space-y-4">
+        <div class="grid grid-cols-3 gap-4">
+          <!-- 상담사 선택 -->
+          <div class="search-option-group">
+            <label class="section-title">상담사</label>
+            <select name="counselor" class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+              <option value="">선택하세요</option>
+            </select>
+          </div>
+
+          <!-- 기간 설정 -->
+          <div class="search-option-group">
+            <label class="section-title">기간 설정</label>
+            <div class="grid grid-cols-2 gap-2">
+              <input type="date" name="startDate" class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+              <input type="date" name="endDate" class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+          </div>
+
+          <!-- 상품 선택 -->
+          <div class="search-option-group">
+            <label class="section-title">상품</label>
+            <select name="product" class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+              <option value="">전체</option>
+              <option value="오토_신차">오토_신차</option>
+              <option value="오토_중고차">오토_중고차</option>
+              <option value="오토_렌터카">오토_렌터카</option>
+              <option value="오토_리스">오토_리스</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 검색 버튼 -->
+        <div class="flex justify-end space-x-2">
+          <button type="reset" class="px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50">
+            초기화
+          </button>
+          <button type="submit" class="px-3 py-1.5 border border-transparent rounded-md shadow-sm text-sm text-white bg-blue-600 hover:bg-blue-700">
+            검색
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 검색 결과 테이블 -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-4">
+            <h2 class="text-lg font-semibold text-gray-800">검색 결과</h2>
+            <span class="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                            총 <span class="font-bold" id="totalCount">0</span>건
+                        </span>
+          </div>
+          <button type="button" class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-sm text-white bg-green-600 hover:bg-green-700">
+            <svg class="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            목록다운로드
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상담일자</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">고객번호</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상담사번호</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상담사명</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Call 번호</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상품</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">스크립트 Score</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">수수료/이면약정</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">계약외지원약속</th>
+          </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200" id="callListBody">
+          <!-- 데이터는 JavaScript로 동적 생성 -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 페이징 컴포넌트 -->
+      <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 sm:px-6">
+        <!-- 페이징 내용 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 현황 탭 컨텐츠 -->
+  <div id="statsTab" class="tab-content hidden">
+    <!-- 검색 조건 -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <form id="statsSearchForm" class="grid grid-cols-3 gap-4">
+        <!-- 기간 설정 -->
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700">기간 설정</label>
+          <div class="mt-1 flex space-x-4">
+            <input type="date" name="startDate" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            <span class="self-center">~</span>
+            <input type="date" name="endDate" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+          </div>
+        </div>
+
+        <!-- 상담사 선택 -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">상담사</label>
+          <select name="counselor" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            <option value="">전체</option>
+          </select>
+        </div>
+
+        <!-- 상품 선택 -->
+        <div class="col-span-3">
+          <label class="block text-sm font-medium text-gray-700">상품</label>
+          <select name="product" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            <option value="">전체</option>
+            <option value="소매">소매</option>
+            <option value="오토_신차">오토_신차</option>
+            <option value="오토_중고차">오토_중고차</option>
+            <option value="오토_렌터카">오토_렌터카</option>
+            <option value="오토_리스">오토_리스</option>
+          </select>
+        </div>
+
+        <!-- 검색 버튼 -->
+        <div class="col-span-3 flex justify-end">
+          <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+            조회
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 차트 영역 -->
+    <!-- 그래프와 통계 테이블은 미납안내와 동일한 구조 사용 -->
+    <!-- 그래프 영역 -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div class="grid grid-cols-3 gap-6">
+        <!-- 콜수/고객수/상담수 차트 -->
+        <div class="w-full">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">상담 현황</h3>
+          <canvas id="callsChart"></canvas>
+        </div>
+        <!-- 평균 스크립트 Score 차트 -->
+        <div class="w-full">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">스크립트 점수</h3>
+          <canvas id="scoreChart"></canvas>
+        </div>
+        <!-- 문제소지 콜수 비중 차트 -->
+        <div class="w-full">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">문제소지 콜 비중</h3>
+          <canvas id="issueChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 그리드 -->
+    <!-- 상세 통계 그리드 -->
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">상세 통계</h3>
+        <button onclick="downloadStats()"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          엑셀 다운로드
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead>
+          <tr class="bg-gray-50">
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">구분</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">항목</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">측정치</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">비중(%)</th>
+          </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200" id="statsDetailGrid">
+          <!-- 데이터는 JavaScript로 동적 생성 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

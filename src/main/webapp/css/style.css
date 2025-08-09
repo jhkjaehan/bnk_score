@@ -1,0 +1,137 @@
+@charset "utf-8";
+
+.gnb-box .left {}
+.top-menu>li { float:left; }
+caption {
+    overflow: hidden;
+    width: 0 !important;
+    height: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.button-area .right-button button { float : right; }
+
+
+.tab-link {
+    @apply border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm;
+}
+
+.tab-link.active {
+    @apply border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.stats-category {
+    color: #4F46E5;
+    font-weight: 600;
+}
+
+.stats-item {
+    color: #374151;
+    font-weight: 500;
+}
+
+.stats-measure {
+    font-family: 'Roboto Mono', monospace;  /* 숫자용 폰트 */
+}
+
+.stats-table-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+
+.sortable th {
+    position: relative;
+    cursor: pointer;
+    padding-right: 25px !important; /* 아이콘을 위한 여백 확보 */
+}
+
+.sort-icon {
+    /*position: absolute;*/
+    /*right: 8px;*/
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px; /* 아이콘 크기 증가 */
+    color: #6B7280; /* 기본 회색 */
+    transition: color 0.2s;
+}
+
+.sort-order {
+    display: none; /* 기본적으로 숨김 */
+}
+
+/* 정렬 활성화 상태 */
+.sortable th.active .sort-icon {
+    color: #3B82F6; /* 활성화된 상태에서는 파란색 */
+}
+
+/* 호버 효과 */
+.sortable th:hover .sort-icon {
+    color: #2563EB;
+}
+
+/* 정렬 방향 아이콘 커스텀 */
+.sort-icon[data-direction="asc"]::after {
+    content: "▲";
+}
+
+.sort-icon[data-direction="desc"]::after {
+    content: "▼";
+}
+
+.sort-icon[data-direction="none"]::after {
+    content: "⬍";
+}
+
+
+
+
+/* 탭메뉴 스타일 */
+
+.tab-link {
+    @apply text-gray-500 hover:text-gray-700 relative transition-colors duration-200 ease-in-out;
+}
+
+.tab-link.active {
+    @apply text-blue-600;
+}
+
+.tab-link .inline-flex {
+    @apply border-transparent transition-all duration-200 ease-in-out;
+}
+
+.tab-link.active .inline-flex {
+    @apply border-blue-500;
+}
+
+.tab-link:hover .inline-flex {
+    @apply border-gray-300;
+}
+
+.tab-link.active:hover .inline-flex {
+    @apply border-blue-500;
+}
+
+/* 호버 효과 애니메이션 */
+.tab-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 transform scale-x-0 transition-transform duration-200 ease-in-out;
+}
+
+.tab-link:hover::after {
+    @apply transform scale-x-100;
+}
+
+.tab-link.active::after {
+    @apply transform scale-x-100;
+}

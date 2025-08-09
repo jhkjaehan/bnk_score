@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Common">
+
+    <!-- resultType을 HashMap으로 지정 -->
+    <select id="selectCounselorList" parameterType="hashmap" resultType="hashmap">
+        <!-- Common.selectCounselorList -->
+        SELECT
+        counselor_cd AS "counselorCd",
+        name AS "name",
+        extension_num AS "extensionNum",
+        task_name AS "taskName",
+        reg_dt AS "regDt",
+        upd_dt AS "updDt"
+        FROM mstr_counselor
+        <where>
+            <if test="counselorCd != null and counselorCd != ''">
+                AND counselor_cd = #{counselorCd}
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="taskName != null and taskName != ''">
+                AND task_name = #{taskName}
+            </if>
+        </where>
+        ORDER BY reg_dt DESC
+    </select>
+
+    <!-- resultType을 HashMap으로 지정 -->
+    <select id="selectMstrContentList" parameterType="hashmap" resultType="hashmap">
+        <!-- Common.selectMstrContentList -->
+        WITH
+        /*필터링된 RES와 CONT의 매칭 결과를 먼저 정의*/
+        FILTERED AS (
+        SELECT RES.TASK_ID,
+        RES.TYPE_ID,
+        CONT.TYPE_NAME,
+        RES.ITEM_ID,
+        CONT.ITEM_NAME,
+        RES.CONTENT_ID,
+        CONT.CONTENT_NAME,
+        RES.RESULT_VALUE,
+        RES.RESULT_DIALOGUE
+        FROM MSTR_ANALYSIS_RESULT RES
+        JOIN V_MSTR_EVAL_CONTENT CONT
+        ON RES.task_id = CONT.task_id
+        AND RES.type_id = CONT.type_id
+        AND RES.item_id = CONT.item_id
+        AND RES.content_id = CONT.content_id
+        <where>
+            <if test="taskId != null and taskId != ''">
+                AND RES.TASK_ID = #{taskId}
+            </if>
+            <if test="typeId != null and typeId != ''">
+                AND RES.TYPE_ID = #{typeId}
+            </if>
+            <if test="itemId != null and itemId != ''">
+                AND RES.ITEM_ID = #{itemId}
+            </if>
+            <if test="contentId != null and contentId != ''">
+                AND RES.CONTENT_ID = #{contentId}
+            </if>
+            <if test="callId != null and callId != ''">
+                AND RES.CALL_ID = #{callId}
+            </if>
+            AND RES.RESULT_VALUE IN ('Y','N')
+        </where>
+        ),
+        /* TYPE 단위 COUNT*/
+        TYPE_COUNT AS (
+        SELECT TASK_ID, TYPE_ID, COUNT(*) AS typeCnt
+        FROM FILTERED
+        GROUP BY TASK_ID, TYPE_ID
+        ),
+        /*ITEM 단위 COUNT*/
+        ITEM_COUNT AS (
+        SELECT TASK_ID, TYPE_ID, ITEM_ID, COUNT(*) AS itemCnt
+        FROM FILTERED
+        GROUP BY TASK_ID, TYPE_ID, ITEM_ID
+        ),
+        /*CONTENT 단위 COUNT*/
+        CONTENT_COUNT AS (
+        SELECT TASK_ID, TYPE_ID, ITEM_ID, CONTENT_ID, COUNT(*) AS cententCnt
+        FROM FILTERED
+        GROUP BY TASK_ID, TYPE_ID, ITEM_ID, CONTENT_ID
+        )
+        SELECT
+        F.TASK_ID AS "taskId",
+        F.TYPE_ID AS "typeId",
+        F.TYPE_NAME AS "typeName",
+        F.ITEM_ID AS "itemId",
+        F.ITEM_NAME AS "itemName",
+        F.CONTENT_ID AS "contentId",
+        F.CONTENT_NAME AS "contentName",
+        TC.typeCnt,
+        IC.itemCnt,
+        CC.cententCnt,
+        F.RESULT_VALUE AS "evaluationResult",
+        F.RESULT_DIALOGUE AS "resultDialogue"
+        FROM FILTERED F
+        LEFT JOIN TYPE_COUNT TC
+        ON F.TASK_ID = TC.TASK_ID AND F.TYPE_ID = TC.TYPE_ID
+        LEFT JOIN ITEM_COUNT IC
+        ON F.TASK_ID = IC.TASK_ID AND F.TYPE_ID = IC.TYPE_ID AND F.ITEM_ID = IC.ITEM_ID
+        LEFT JOIN CONTENT_COUNT CC
+        ON F.TASK_ID = CC.TASK_ID AND F.TYPE_ID = CC.TYPE_ID
+        AND F.ITEM_ID = CC.ITEM_ID AND F.CONTENT_ID = CC.CONTENT_ID;
+    </select>
+
+    <!-- 상담 점수 조회 -->
+    <select id="selectMstrScore" parameterType="hashmap" resultType="hashmap">
+    <!-- Common.selectMstrScore -->
+        SELECT B.SCORE_ID AS "scoreId"
+            , B.NAME AS "scoreName"
+            , IFNULL(A.SCORE_VALUE,0) AS "scoreValue"
+        FROM MSTR_EVAL_SCORE_CONTENT B
+        LEFT JOIN MSTR_ANALYSIS_SCORE A
+        ON A.SCORE_ID = B.SCORE_ID
+        WHERE B.TASK_ID = #{taskId}
+        <if test="callId != null and callId != ''">
+        AND A.CALL_ID = #{callId}
+        </if>
+        ORDER BY A.TASK_ID, A.SCORE_ID
+    </select>
+
+
+</mapper>
