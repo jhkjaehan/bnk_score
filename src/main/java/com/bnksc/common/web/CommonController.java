@@ -118,6 +118,7 @@ public class CommonController {
         return "jsonView";
     }
 
+    /*
     @RequestMapping(value="/common/selectScoreChartData.do")
     public String selectScoreChartData(@RequestParam Map<String, Object> params, Model model) {
         try {
@@ -134,5 +135,6 @@ public class CommonController {
 
         return "jsonView";
     }
+    */
 
 }

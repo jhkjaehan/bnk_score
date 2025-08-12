@@ -6,7 +6,7 @@
         <nav class="-mb-px flex space-x-8" aria-label="Tabs">
             <a href="#" class="tab-link active group" data-tab="list">
                 <div class="inline-flex items-center px-3 py-2 border-b-2 font-medium text-sm">
-                    <svg class="mr-2 h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="mr-2 h-5 w-5 text-blue-500 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                     </svg>
                     CALL 리스트

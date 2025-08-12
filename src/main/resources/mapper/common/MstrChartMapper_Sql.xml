@@ -6,12 +6,46 @@
 
     <select id="selectCallChartData" parameterType="hashmap" resultType="hashmap">
     <!-- MstrChart.selectCallChartData -->
-        SELECT
-            taskId
-            , name
-            , cnt
-            , ratio
-        FROM V_MSTR_CHART_STAT
+        with call_stats as (select v.TASK_ID                      AS TASK_ID,
+        count(distinct v.CALL_ID)      AS CALL_CNT,
+        count(distinct c.counselor_cd) AS COUNSELOR_CNT,
+        count(distinct c.cust_num)     AS CUST_CNT
+        from v_mstr_call_task v join mstr_call c
+        on v.CALL_ID = c.call_id
+        <where>
+            <if test="taskId != null and taskId != ''">
+                AND v.TASK_ID = #{taskId}
+            </if>
+            <if test="startDate != null and startDate !=''">
+                AND C.CALL_DT <![CDATA[ >= ]]> STR_TO_DATE(#{startDate},'%Y-%m-%d')
+
+            </if>
+            <if test="endDate != null and endDate !=''">
+                AND C.CALL_DT <![CDATA[ <= ]]> STR_TO_DATE(#{endDate},'%Y-%m-%d')
+            </if>
+            <if test="counselor != null and counselor != ''">
+                AND C.COUNSELOR_CD = #{counselor}
+            </if>
+        </where>
+        group by v.TASK_ID)
+        select call_stats.TASK_ID AS taskId
+             , '콜수' AS name
+             , call_stats.CALL_CNT AS cnt
+             , 100.0 AS ratio
+        from call_stats
+        union all
+        select call_stats.TASK_ID                                                              AS taskId,
+        '상담사수'                                                                          AS name,
+        call_stats.COUNSELOR_CNT                                                        AS cnt,
+        round(((call_stats.COUNSELOR_CNT * 100.0) / nullif(call_stats.CALL_CNT, 0)), 1) AS ratio
+        from call_stats
+        union all
+        select call_stats.TASK_ID                                                         AS taskId,
+        '고객수'                                                                      AS name,
+        call_stats.CUST_CNT                                                        AS cnt,
+        round(((call_stats.CUST_CNT * 100.0) / nullif(call_stats.CALL_CNT, 0)), 1) AS ratio
+        from call_stats
+        order by taskId, name
     </select>
 
     <select id="selectScoreChartData" parameterType="hashmap" resultType="hashmap">
@@ -24,12 +58,24 @@
         LEFT JOIN MSTR_EVAL_SCORE_CONTENT B
         ON A.TASK_ID = B.TASK_ID
         AND A.SCORE_ID = B.SCORE_ID
+       LEFT JOIN MSTR_CALL C
+        ON A.CALL_ID = C.CALL_ID
         <where>
             <if test="taskId != null and taskId != ''">
                 AND A.TASK_ID = #{taskId}
             </if>
             <if test="taskId == 'TA0001'">
                 AND A.SCORE_ID NOT IN ('S0006')
+            </if>
+            <if test="startDate != null and startDate !=''">
+                AND C.CALL_DT <![CDATA[ >= ]]> STR_TO_DATE(#{startDate},'%Y-%m-%d')
+
+            </if>
+            <if test="endDate != null and endDate !=''">
+                AND C.CALL_DT <![CDATA[ <= ]]> STR_TO_DATE(#{endDate},'%Y-%m-%d')
+            </if>
+            <if test="counselor != null and counselor != ''">
+                AND C.COUNSELOR_CD = #{counselor}
             </if>
         </where>
         GROUP BY A.TASK_ID, A.SCORE_ID
@@ -38,19 +84,73 @@
 
     <select id="selectProblemChartData" parameterType="hashmap" resultType="hashmap">
     <!-- MstrChart.selectProblemChartData -->
-        SELECT TASK_ID AS "taskId"
-            , TYPE_ID AS "typeId"
-            , ITEM_ID AS "itemId"
-            , NAME AS "name"
-            , CNT AS "cnt"
-            , RATIO AS "ratio"
-        FROM V_MSTR_PROB_CALL
+        with call_stats as (
+            SELECT
+                MAR.task_id AS TASK_ID,
+                MAR.type_id AS TYPE_ID,
+                CASE
+                WHEN GROUPING(MAR.item_id) = 1 THEN 'I0000'
+                ELSE MAR.item_id
+                END AS ITEM_ID,
+                COUNT(DISTINCT MAR.call_id) AS CNT
+            FROM mstr_analysis_result MAR
+            LEFT JOIN MSTR_CALL MC
+            ON MAR.call_id = MC.call_id
+            <where>
+            AND MAR.result_value = 'Y'
+                <if test="startDate != null and startDate !=''">
+                    AND MC.CALL_DT <![CDATA[ >= ]]> STR_TO_DATE(#{startDate},'%Y-%m-%d')
+
+                </if>
+                <if test="endDate != null and endDate !=''">
+                    AND MC.CALL_DT <![CDATA[ <= ]]> STR_TO_DATE(#{endDate},'%Y-%m-%d')
+                </if>
+                <if test="counselor != null and counselor != ''">
+                    AND MC.COUNSELOR_CD = #{counselor}
+                </if>
+            </where>
+            GROUP BY MAR.task_id,
+                MAR.type_id,
+                MAR.item_id
+            WITH ROLLUP
+            HAVING NOT (MAR.task_id IS NULL OR MAR.type_id IS NULL)
+            ORDER BY TASK_ID, TYPE_ID, ITEM_ID
+        )
+        select a.TASK_ID AS "taskId",
+            a.TYPE_ID AS "typeId",
+            a.ITEM_ID  AS "itemId",
+            if((a.ITEM_ID = 'I0000'), '전체', b.name) AS "name",
+            a.CNT AS "cnt",
+            round(((a.CNT * 100) / (
+                select COUNT(*)
+                from V_MSTR_CALL_TASK VMCT
+                LEFT JOIN MSTR_CALL MCS
+                ON VMCT.CALL_ID = MCS.CALL_ID
+            <where>
+                AND VMCT.TASK_ID = a.TASK_ID
+                <if test="startDate != null and startDate !=''">
+                    AND MCS.CALL_DT <![CDATA[ >= ]]> STR_TO_DATE(#{startDate},'%Y-%m-%d')
+                </if>
+                <if test="endDate != null and endDate !=''">
+                    AND MCS.CALL_DT <![CDATA[ <= ]]> STR_TO_DATE(#{endDate},'%Y-%m-%d')
+                </if>
+                <if test="counselor != null and counselor != ''">
+                    AND MCS.COUNSELOR_CD = #{counselor}
+                </if>
+            </where>
+            )),1) AS "ratio"
+        from (call_stats a
+            left join mstr_eval_item b
+            on a.TASK_ID = b.task_id
+            and a.TYPE_ID = b.type_id
+            and a.ITEM_ID = b.item_id
+        )
         <where>
             <if test="taskId != null and taskId != ''">
-                AND TASK_ID = #{taskId}
+                AND a.TASK_ID = #{taskId}
             </if>
             <if test="typeId != null and typeId != ''">
-                AND TYPE_ID = #{typeId}
+                AND a.TYPE_ID = #{typeId}
             </if>
         </where>
     </select>

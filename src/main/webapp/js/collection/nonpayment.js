@@ -147,15 +147,21 @@ function loadChartData() {
 
     selectCallChartData();
     //selectScoreChartData();
-    initializeCharts();
+    //initializeCharts();
 }
 
 function selectCallChartData() {
 
+    var searchForm = $("#statsSearchForm").serializeArray();
+
+    const data = searchForm;
+    data.push({name: 'taskId', value: "TA0001"});
+    data.push({name: 'typeId', value: "T0002"});
+
     $.ajax({
         url: '/common/selectCallChartData.do',
         method: 'POST',
-        data: {taskId:"TA0001", typeId:"T0002"},
+        data: data,
         success: function(response) {
             console.log(response);
             initChartData(response.callChartData,"TA0001","CALL");
@@ -163,6 +169,8 @@ function selectCallChartData() {
             initChartData(response.problemChartData,"TA0001","PROBLEM");
 
             initSheetData(response);
+
+            initializeCharts();
         },
         error: function(xhr, status, error) {
             console.error('데이터 조회 실패:', error);
@@ -171,6 +179,7 @@ function selectCallChartData() {
     })
 }
 
+/*
 function selectScoreChartData() {
 
     $.ajax({
@@ -187,6 +196,7 @@ function selectScoreChartData() {
         }
     })
 }
+*/
 
 // 차트 제거 함수
 function destroyCharts() {
@@ -209,6 +219,13 @@ function initChartData(data,taskId,type) {
     var taskId = taskId ? taskId : '';
     if(data == null || data == undefined || data.length == 0) {
         console.log("error! 데이터가 없습니다.");
+        if(type == "CALL") {
+            callsChartData = null;
+        } else if(type == "SCORE") {
+            scoreChartData = null;
+        } else if(type == "PROBLEM") {
+            problemChartData = null;
+        }
         return false;
     }
 
@@ -318,6 +335,7 @@ function initializeCharts() {
 
     const problemNameList = [];
     const problemCntList = [];
+
     problemChartData.forEach(row => {
         problemNameList.push(row.name);
         problemCntList.push(row.ratio);
@@ -400,7 +418,7 @@ function updateCharts(newData) {
 function resetSearchForm() {
     $('#statsSearchForm')[0].reset();
     destroyCharts();
-    initializeCharts();
+    loadChartData();
 }
 
 function initSheetData(response) {
@@ -496,7 +514,12 @@ function renderStatsDetailGrid(data) {
 
 // 숫자 포맷팅 함수
 function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    // 숫자를 문자열로 변환 후 소수점 기준 분리
+    const parts = x.toString().split(".");
+    // 정수 부분에만 콤마 적용
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    // 소수 부분이 있으면 다시 합침
+    return parts.join(".");
 }
 
 // AJAX 성공 시 데이터 렌더링
@@ -619,6 +642,15 @@ function bindEvent() {
         e.preventDefault();
         const target = $(this).data('tab');
 
+        // 아이콘 색상 변경
+        $('.tab-link svg')
+            .removeClass('text-blue-500')
+            .addClass('text-gray-400');
+
+        $(this).find('svg')
+            .removeClass('text-gray-400')
+            .addClass('text-blue-500');
+
         // 탭 스타일 변경
         $('.tab-link').removeClass('active');
         $(this).addClass('active');
@@ -631,14 +663,14 @@ function bindEvent() {
 
         // 현황 탭 선택 시 차트 초기화
         if (target === 'stats') {
-            initializeCharts();
+            loadChartData();
         }
     });
 
     // 통계 검색 폼 제출
     $('#statsSearchForm').on('submit', function(e) {
         e.preventDefault();
-        initializeCharts(); // 새로운 차트 생성
+        loadChartData(); // 새로운 차트 생성
 
     });
 
