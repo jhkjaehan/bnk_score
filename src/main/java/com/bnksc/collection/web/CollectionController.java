@@ -162,6 +162,7 @@ public class CollectionController extends BaseController {
      */
     @RequestMapping(value="/collection/afterHappyCallDetailPage.do")
     public String afterHappyCallDetailPage(HttpServletRequest request, Model model) {
+        Map<String, Object> params = getParams(request);
         return "/collection/afterHappyCallDetail";
     }
 

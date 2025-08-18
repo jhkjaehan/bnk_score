@@ -81,7 +81,6 @@ function searchList(Page) {
         traditional: false,
         success: function(response) {
             const data = response.data;
-            console.log(data);
             loadMstrSearchList(data);
             updatePagination(data.currentPage, data.totalPages);
         },
@@ -136,7 +135,7 @@ function loadMstrSearchList(data) {
         $trTemplate.append($(tdTemplate).text(row.custNum));
         $trTemplate.append($(tdTemplate).text(row.counselorCd));
         $trTemplate.append($(tdTemplate).text(row.counselorName));
-        $trTemplate.append($(tdTemplate).addClass("cursor-pointer text-blue-600 hover:text-blue-800").on("click",function(){ openDetailPage(row.callId) }).text(row.callId));
+        $trTemplate.append($(tdTemplate).addClass("cursor-pointer text-blue-600 hover:text-blue-800").on("click",function(){ openDetailPage(row.callId,row.taskId) }).text(row.callId));
         $trTemplate.append($(tdTemplate).text(row.taskName));
         $trTemplate.append($(tdTemplate).text(row.scoreValue));
         $trTemplate.append($(tdTemplate).text(row.item01)); //수수료/이면약정
@@ -192,14 +191,14 @@ function updatePagination(currentPage, totalPages) {
 
 
 // 상세 페이지 이동
-function openDetailPage(callNumber) {
+function openDetailPage(callNumber,taskId) {
     const width = 1024;
     const height = 768;
     const left = (window.screen.width / 2) - (width / 2);
     const top = (window.screen.height / 2) - (height / 2);
 
     window.open(
-        `/collection/afterHappyCallDetailPage.do?callId=${callNumber}`,
+        `/collection/afterHappyCallDetailPage.do?callId=${callNumber}&taskId=${taskId}`,
         'DetailView',
         `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
     );
@@ -332,21 +331,6 @@ function bindEvent() {
             updateSortUI();
             searchList(1);
         }
-        /*
-        if(e.shiftKey) {
-
-        } else {
-            // 일반 클릭: 단일 정렬
-            sortOrder = [{
-                column: column,
-                direction: 'asc'
-            }];
-            updateSortUI();
-        }
-        */
-
-        // 정렬 실행
-        //fetchSortedData();
     })
 
     // 정렬 초기화 버튼 이벤트
