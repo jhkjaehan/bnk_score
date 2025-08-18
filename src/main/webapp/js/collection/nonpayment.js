@@ -2,7 +2,6 @@
 let callsChart = null;
 let scoreChart = null;
 let issueChart = null;
-let sortOrder = [];
 let callsChartData = null;
 let scoreChartData = null;
 let problemChartData = null;
@@ -13,10 +12,9 @@ let sampleData = [];
 $(document).ready(function() {
     bindEvent();
 
-    //renderStatsDetailGrid(sampleData);
-    //상담사 목록
-    getCounselorList();
+    //화면 로드
     loadPage();
+    //차트 로드
     loadChartData();
 });
 
@@ -33,7 +31,7 @@ function openDetailPage(callId) {
     );
 }
 
-function loadPage(page) {
+function searchNonpayList(page) {
     var page = page || 1;
 
     var searchForm = $("#searchForm").serializeArray();
@@ -58,6 +56,13 @@ function loadPage(page) {
             alert('데이터 조회 중 오류가 발생했습니다.');
         }
     })
+}
+
+function loadPage() {
+    //상담사 목록
+    getCounselorList();
+    //목록조회
+    searchNonpayList();
 }
 
 function loadMstrNonpayList(data) {
@@ -102,7 +107,7 @@ function updatePagination(currentPage, totalPages) {
     // 이전 페이지 버튼
     if(currentPage > 1) {
         $pagination.append(`
-            <a href="#" onclick="loadPage(${currentPage - 1})" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <a href="#" onclick="searchNonpayList(${currentPage - 1})" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <span class="sr-only">이전</span>
                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -119,7 +124,7 @@ function updatePagination(currentPage, totalPages) {
             `);
         } else {
             $pagination.append(`
-                <a href="#" onclick="loadPage(${i})" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">${i}</a>
+                <a href="#" onclick="searchNonpayList(${i})" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">${i}</a>
             `);
         }
     }
@@ -127,7 +132,7 @@ function updatePagination(currentPage, totalPages) {
     // 다음 페이지 버튼
     if(currentPage < totalPages) {
         $pagination.append(`
-            <a href="#" onclick="loadPage(${currentPage + 1})" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <a href="#" onclick="searchNonpayList(${currentPage + 1})" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <span class="sr-only">다음</span>
                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
@@ -527,56 +532,6 @@ function updateStatsDetail(response) {
     renderStatsDetailGrid(response.data);
 }
 
-// 다중 정렬 처리
-function handleMultiSort(column) {
-    const existingSort = sortOrder.find(s => s.column === column);
-
-    if (existingSort) {
-        // 이미 정렬 중인 컬럼이면 방향만 변경
-        existingSort.direction = existingSort.direction === 'asc' ? 'desc' : 'asc';
-    } else {
-        // 새로운 정렬 조건 추가
-        sortOrder.push({
-            column: column,
-            direction: 'asc',
-            order: sortOrder.length + 1
-        });
-    }
-
-    loadPage(1);
-}
-
-
-// 정렬 UI 업데이트
-function updateSortUI() {
-    // 모든 정렬 아이콘 초기화
-    $('.sortable .sort-icon').attr('data-direction', 'none');
-    $('.sortable .sort-order').hide();
-    $('.sortable th').removeClass('active');
-
-    // 현재 정렬 상태 표시
-    sortOrder.forEach((sort, index) => {
-        const th = $(`.sortable th[data-sort="${sort.column}"]`);
-        th.addClass('active');
-
-        // 정렬 방향 아이콘 설정
-        th.find('.sort-icon').attr('data-direction', sort.direction);
-
-        // 다중 정렬일 경우 순서 표시
-        if (sortOrder.length > 1) {
-            const orderSpan = th.find('.sort-order');
-            // orderSpan.text(index + 1).show();
-        }
-    });
-
-}
-
-function resetSort() {
-    sortOrder = [];
-    updateSortUI();
-
-}
-
 // 서버에 정렬된 데이터 요청
 function fetchSortedData() {
     const params = {
@@ -637,35 +592,7 @@ function getSearchParams() {
 
 // 이벤트 바인딩
 function bindEvent() {
-    // 탭 전환 로직
-    $('.tab-link').on('click', function(e) {
-        e.preventDefault();
-        const target = $(this).data('tab');
-
-        // 아이콘 색상 변경
-        $('.tab-link svg')
-            .removeClass('text-blue-500')
-            .addClass('text-gray-400');
-
-        $(this).find('svg')
-            .removeClass('text-gray-400')
-            .addClass('text-blue-500');
-
-        // 탭 스타일 변경
-        $('.tab-link').removeClass('active');
-        $(this).addClass('active');
-
-        // 컨텐츠 전환
-        $('.tab-content').addClass('hidden');
-        $('.tab-content').removeClass('active');
-        $(`#${target}Tab`).removeClass('hidden');
-        $(`#${target}Tab`).addClass('active');
-
-        // 현황 탭 선택 시 차트 초기화
-        if (target === 'stats') {
-            loadChartData();
-        }
-    });
+    commonBindEvent();
 
     // 통계 검색 폼 제출
     $('#statsSearchForm').on('submit', function(e) {
@@ -682,6 +609,7 @@ function bindEvent() {
             //다중 정렬 추가
             handleMultiSort(column);
             updateSortUI();
+            searchNonpayList(1);
         }
         /*
         if(e.shiftKey) {
@@ -711,17 +639,17 @@ function bindEvent() {
             $(this).find("svg").removeClass('animate-spin');
         }, 500);
 
-        loadPage();
+        searchNonpayList();
     });
 
     //페이지 사이즈 변경 이벤트
     $("#listTab").find("select[name=pageSize]").on("change", function(e) {
-        loadPage();
+        searchNonpayList();
     });
 
     //미납안내 Call 리스트 목록 검색버튼
     $("#searchForm").on("submit",function(e){
         e.preventDefault();
-        loadPage();
+        searchNonpayList();
     });
 }

@@ -46,10 +46,6 @@
             <label class="section-title">상품</label>
             <select name="product" class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
               <option value="">전체</option>
-              <option value="오토_신차">오토_신차</option>
-              <option value="오토_중고차">오토_중고차</option>
-              <option value="오토_렌터카">오토_렌터카</option>
-              <option value="오토_리스">오토_리스</option>
             </select>
           </div>
         </div>
@@ -67,35 +63,69 @@
     </div>
 
     <!-- 검색 결과 테이블 -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden table-container">
       <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
         <div class="flex justify-between items-center">
           <div class="flex items-center space-x-4">
             <h2 class="text-lg font-semibold text-gray-800">검색 결과</h2>
-            <span class="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                            총 <span class="font-bold" id="totalCount">0</span>건
-                        </span>
+            <span class="totalCount text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                총 <span class="font-bold" id="totalCount">0</span>건
+            </span>
           </div>
-          <button type="button" class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-sm text-white bg-green-600 hover:bg-green-700">
-            <svg class="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-            </svg>
-            목록다운로드
-          </button>
+          <div class="flex space-x-2"> <!-- 버튼 그룹 추가 -->
+            <button type="button" id="resetSortBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              정렬 초기화
+            </button>
+            <button type="button" class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+              <svg class="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              목록다운로드
+            </button>
+          </div>
         </div>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table id="mstrHappyTable" class="sortable min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
           <tr>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상담일자</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">고객번호</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상담사번호</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상담사명</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Call 번호</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상품</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">스크립트 Score</th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callDt">
+              상담일자
+              <span class="sort-icon" data-direction="none"></span>
+              <span class="sort-order"></span>
+            </th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="custNum">
+              고객번호
+              <span class="sort-icon" data-direction="none"></span>
+              <span class="sort-order"></span>
+            </th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorCd">
+              상담사번호
+              <span class="sort-icon" data-direction="none"></span>
+              <span class="sort-order"></span>
+            </th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorName">
+              상담사명
+              <span class="sort-icon" data-direction="none"></span>
+              <span class="sort-order"></span>
+            </th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callId">
+              Call 번호
+              <span class="sort-icon" data-direction="none"></span>
+              <span class="sort-order"></span>
+            </th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              상품
+            </th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="scoreValue">
+              스크립트 Score
+              <span class="sort-icon" data-direction="none"></span>
+              <span class="sort-order"></span>
+            </th>
             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">수수료/이면약정</th>
             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">계약외지원약속</th>
           </tr>
@@ -108,7 +138,46 @@
 
       <!-- 페이징 컴포넌트 -->
       <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 sm:px-6">
-        <!-- 페이징 내용 -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center text-sm text-gray-700">
+            <label class="mr-2">페이지당 행:</label>
+            <select name="pageSize" class="border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-center">
+            <nav class="pagination relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">이전</span>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </a>
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-blue-600 hover:bg-blue-50">1</a>
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</a>
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</a>
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">4</a>
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">5</a>
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">6</a>
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">7</a>
+              <%--<span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-gray-50 text-sm font-medium text-gray-700">...</span>--%>
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">8</a>
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">9</a>
+              <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">10</a>
+              <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">다음</span>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+              </a>
+            </nav>
+          </div>
+          <div class="flex items-center text-sm text-gray-700">
+          </div>
+        </div>
       </div>
     </div>
   </div>

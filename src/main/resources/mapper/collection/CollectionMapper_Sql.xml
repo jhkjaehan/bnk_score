@@ -7,7 +7,10 @@
     <sql id="nonpayListWhere">
         <where>
             <if test="taskId != null and taskId != ''">
-                AND VMC.TASK_ID = #{taskId}
+                AND VMC.TASK_ID IN
+                <foreach item="item" collection="taskId" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
             </if>
             <if test="callId != null and callId != ''">
                 AND MC.CALL_ID = #{callId}
@@ -35,11 +38,24 @@
             <if test="counselor != null and counselor != ''">
                 AND MC.COUNSELOR_CD = #{counselor}
             </if>
+            <if test="product != null and product != ''">
+                AND VMC.TASK_ID = #{product}
+            </if>
 
         </where>
     </sql>
 
-    <!-- resultType을 HashMap으로 지정 -->
+    <!-- 사후해피콜 상품 목록 조회 -->
+    <select id="selectProductList" parameterType="hashmap" resultType="hashmap">
+        <!-- Auto.selectProductList -->
+        SELECT
+        task_id AS "taskId"
+        , REPLACE(name,'사후해피콜-','') AS "taskName"
+        FROM mstr_task
+        WHERE TASK_ID in ('TA0004','TA0005','TA0006','TA0007','TA0008')
+    </select>
+
+    <!-- resultType을 HashMap으로 지정 : 사용안함. -->
     <select id="selectCounselors" parameterType="hashmap" resultType="hashmap">
         <!-- Collection.selectCounselors -->
         SELECT
@@ -100,10 +116,18 @@
                     , VMC.TASK_NAME AS "taskName"
                     , MC.CALL_ID AS "callId"
                     , MAS.SCORE_VALUE AS "scoreValue"
-                    , IFNULL(MARI5.RESULT_VALUE,'N') AS "item05"
-                    , IFNULL(MARI6.RESULT_VALUE,'N') AS "item06"
-                    , IFNULL(MARI7.RESULT_VALUE,'N') AS "item07"
-                    , IFNULL(MARI8.RESULT_VALUE,'N') AS "item08"
+              <choose>
+                  <when test="taskId[0] == 'TA0001'">
+                      , IFNULL(MARI5.RESULT_VALUE,'N') AS "item05"
+                      , IFNULL(MARI6.RESULT_VALUE,'N') AS "item06"
+                      , IFNULL(MARI7.RESULT_VALUE,'N') AS "item07"
+                      , IFNULL(MARI8.RESULT_VALUE,'N') AS "item08"
+                  </when>
+                  <otherwise>
+                      , IFNULL(MARI1.RESULT_VALUE,'N') AS "item01"
+                      , IFNULL(MARI2.RESULT_VALUE,'N') AS "item02"
+                  </otherwise>
+              </choose>
                 FROM MSTR_CALL MC
                 LEFT JOIN MSTR_COUNSELOR MCS
                 ON MC.COUNSELOR_CD = MCS.COUNSELOR_CD
@@ -118,36 +142,57 @@
                         )
                 ) MAS
                 ON MC.CALL_ID = MAS.CALL_ID
-                LEFT JOIN (
+            <choose>
+                <when test="taskId[0] == 'TA0001'">
+                    LEFT JOIN (
                     SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
                     WHERE ITEM_ID = 'I0005'
                     AND RESULT_VALUE = 'Y'
                     GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
-                ) MARI5
-                ON MC.CALL_ID = MARI5.CALL_ID
-                LEFT JOIN (
+                    ) MARI5
+                    ON MC.CALL_ID = MARI5.CALL_ID
+                    LEFT JOIN (
                     SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
                     WHERE ITEM_ID = 'I0006'
                     AND RESULT_VALUE = 'Y'
                     GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
-                ) MARI6
-                ON MC.CALL_ID = MARI6.CALL_ID
-                LEFT JOIN (
+                    ) MARI6
+                    ON MC.CALL_ID = MARI6.CALL_ID
+                    LEFT JOIN (
                     SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
                     WHERE ITEM_ID = 'I0007'
                     AND RESULT_VALUE = 'Y'
                     GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
-                ) MARI7
-                ON MC.CALL_ID = MARI7.CALL_ID
-                LEFT JOIN (
+                    ) MARI7
+                    ON MC.CALL_ID = MARI7.CALL_ID
+                    LEFT JOIN (
                     SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
                     WHERE ITEM_ID = 'I0008'
                     AND RESULT_VALUE = 'Y'
                     GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
-                ) MARI8
-                ON MC.CALL_ID = MARI8.CALL_ID
+                    ) MARI8
+                    ON MC.CALL_ID = MARI8.CALL_ID
+                </when>
+                <otherwise>
+                    LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0034'
+                    AND CONTENT_ID = 'C0097'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                    ) MARI1
+                    ON MC.CALL_ID = MARI1.CALL_ID
+                    LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0043'
+                    AND CONTENT_ID = 'C0117'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                    ) MARI2
+                    ON MC.CALL_ID = MARI2.CALL_ID
+                </otherwise>
+            </choose>
             <include refid="nonpayListWhere"/>
-
             <choose>
                 <when test="sortOrder != null and sortOrder.size() > 0">
                     ORDER BY
@@ -183,34 +228,56 @@
         )
         ) MAS
         ON MC.CALL_ID = MAS.CALL_ID
-        LEFT JOIN (
-        SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
-        WHERE ITEM_ID = 'I0005'
-        AND RESULT_VALUE = 'Y'
-        GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
-        ) MARI5
-        ON MC.CALL_ID = MARI5.CALL_ID
-        LEFT JOIN (
-        SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
-        WHERE ITEM_ID = 'I0006'
-        AND RESULT_VALUE = 'Y'
-        GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
-        ) MARI6
-        ON MC.CALL_ID = MARI6.CALL_ID
-        LEFT JOIN (
-        SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
-        WHERE ITEM_ID = 'I0007'
-        AND RESULT_VALUE = 'Y'
-        GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
-        ) MARI7
-        ON MC.CALL_ID = MARI7.CALL_ID
-        LEFT JOIN (
-        SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
-        WHERE ITEM_ID = 'I0008'
-        AND RESULT_VALUE = 'Y'
-        GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
-        ) MARI8
-        ON MC.CALL_ID = MARI8.CALL_ID
+            <choose>
+                <when test="taskId[0] == 'TA0001'">
+                    LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0005'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                    ) MARI5
+                    ON MC.CALL_ID = MARI5.CALL_ID
+                    LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0006'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                    ) MARI6
+                    ON MC.CALL_ID = MARI6.CALL_ID
+                    LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0007'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                    ) MARI7
+                    ON MC.CALL_ID = MARI7.CALL_ID
+                    LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0008'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                    ) MARI8
+                    ON MC.CALL_ID = MARI8.CALL_ID
+                </when>
+                <otherwise>
+                    LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0034'
+                    AND CONTENT_ID = 'C0097'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                    ) MARI1
+                    ON MC.CALL_ID = MARI1.CALL_ID
+                    LEFT JOIN (
+                    SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0043'
+                    AND CONTENT_ID = 'C0117'
+                    AND RESULT_VALUE = 'Y'
+                    GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
+                    ) MARI2
+                    ON MC.CALL_ID = MARI2.CALL_ID
+                </otherwise>
+            </choose>
         <include refid="nonpayListWhere"/>
     </select>
 

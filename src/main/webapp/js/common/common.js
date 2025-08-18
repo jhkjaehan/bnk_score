@@ -1,3 +1,53 @@
+let sortOrder = [];
+
+// 다중 정렬 처리
+function handleMultiSort(column) {
+    const existingSort = sortOrder.find(s => s.column === column);
+
+    if (existingSort) {
+        // 이미 정렬 중인 컬럼이면 방향만 변경
+        existingSort.direction = existingSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        // 새로운 정렬 조건 추가
+        sortOrder.push({
+            column: column,
+            direction: 'asc',
+            order: sortOrder.length + 1
+        });
+    }
+
+}
+
+// 정렬 UI 업데이트
+function updateSortUI() {
+    // 모든 정렬 아이콘 초기화
+    $('.sortable .sort-icon').attr('data-direction', 'none');
+    $('.sortable .sort-order').hide();
+    $('.sortable th').removeClass('active');
+
+    // 현재 정렬 상태 표시
+    sortOrder.forEach((sort, index) => {
+        const th = $(`.sortable th[data-sort="${sort.column}"]`);
+        th.addClass('active');
+
+        // 정렬 방향 아이콘 설정
+        th.find('.sort-icon').attr('data-direction', sort.direction);
+
+        // 다중 정렬일 경우 순서 표시
+        if (sortOrder.length > 1) {
+            const orderSpan = th.find('.sort-order');
+            // orderSpan.text(index + 1).show();
+        }
+    });
+
+}
+
+//정렬 초기화
+function resetSort() {
+    sortOrder = [];
+    updateSortUI();
+
+}
 
 
 function getCounselorList(taskName) {
@@ -39,6 +89,38 @@ function initCounselorList(data) {
         })
     }
 
-
-
 }
+
+function commonBindEvent() {
+    // 탭 전환 로직
+    $('.tab-link').on('click', function(e) {
+        e.preventDefault();
+        const target = $(this).data('tab');
+
+        // 아이콘 색상 변경
+        $('.tab-link svg')
+            .removeClass('text-blue-500')
+            .addClass('text-gray-400');
+
+        $(this).find('svg')
+            .removeClass('text-gray-400')
+            .addClass('text-blue-500');
+
+        // 탭 스타일 변경
+        $('.tab-link').removeClass('active');
+        $(this).addClass('active');
+
+        // 컨텐츠 전환
+        $('.tab-content').addClass('hidden');
+        $('.tab-content').removeClass('active');
+        $(`#${target}Tab`).removeClass('hidden');
+        $(`#${target}Tab`).addClass('active');
+
+        // 현황 탭 선택 시 차트 초기화
+        /*if (target === 'stats') {
+            loadChartData();
+        }*/
+    });
+}
+
+

@@ -21,11 +21,6 @@ public class CollectionServiceImpl  implements CollectionService {
 
 
     @Override
-    public List<Map<String, Object>> getCounselorList(Map<String, Object> params) {
-        return sqlSession.selectList("Collection.selectCounselors", params);
-    }
-
-    @Override
     public Map<String, Object> selectMstrCallOne(Map<String, Object> params) {
         return sqlSession.selectOne("Collection.selectMstrCallOne", params);
     }
@@ -54,5 +49,10 @@ public class CollectionServiceImpl  implements CollectionService {
         result.put("totalPages", (int) Math.ceil((double) totalCount / pageSize));
 
         return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> selectProductList(Map<String, Object> params) {
+        return sqlSession.selectList("Collection.selectProductList", params);
     }
 }
