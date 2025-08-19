@@ -7,6 +7,10 @@
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/auto/retentionDetail.js"></script>
 </head>
 <body class="bg-gray-50">
+<form method="POST" action="" id="detailForm">
+    <input type="hidden" name="callId" value="${params.callId}"/>
+    <input type="hidden" name="taskId" value="${params.taskId}"/>
+</form>
 <!-- 페이지 최상단에 다운로드 버튼 추가 -->
 <div class="max-w-6xl mx-auto p-6 space-y-6">
     <div class="flex justify-end">
@@ -17,7 +21,6 @@
             다운로드
         </button>
     </div>
-    <!-- 기존 컨텐츠 -->
     <!-- 1. 대표정보 섹션 -->
     <div class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -26,30 +29,30 @@
             </svg>
             대표정보
         </h2>
-        <div class="grid grid-cols-4 gap-4">
+        <div class="grid grid-cols-4 gap-4" id="detailMstrInfo">
             <div class="flex items-center space-x-2">
                 <span class="text-gray-600 font-medium">상담일자:</span>
-                <span data-field="consultationDate">2025-04-01</span>
-            </div>
-            <div class="flex items-center space-x-2">
-                <span class="text-gray-600 font-medium">만기일자:</span>
-                <span data-field="consultationDate">2025-05-14</span>
+                <span data-field="callDt">2025-07-21</span>
             </div>
             <div class="flex items-center space-x-2">
                 <span class="text-gray-600 font-medium">고객번호:</span>
-                <span>01067783418</span>
+                <span data-field="custNum">1234567890</span>
             </div>
             <div class="flex items-center space-x-2">
                 <span class="text-gray-600 font-medium">상담사번호:</span>
-                <span>5250023</span>
+                <span data-field="counselorCd">AG001</span>
             </div>
             <div class="flex items-center space-x-2">
                 <span class="text-gray-600 font-medium">상담사명:</span>
-                <span>A상담사</span>
+                <span data-field="counselorName">홍길동</span>
             </div>
             <div class="flex items-center space-x-2 col-span-2">
                 <span class="text-gray-600 font-medium">Call 번호:</span>
-                <span>20250401092418_5250023_6033</span>
+                <span data-field="callId">CALL-2025-07-21-001</span>
+            </div>
+            <div class="flex items-center space-x-2 col-span-2">
+                <span class="text-gray-600 font-medium">업무:</span>
+                <span data-field="taskName"></span>
             </div>
         </div>
     </div>
@@ -63,7 +66,7 @@
             스크립트 Score
         </h2>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table class="min-w-full divide-y divide-gray-200" id="scoreTable">
                 <thead>
                 <tr class="bg-gray-50">
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">항목</th>
@@ -76,15 +79,6 @@
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                <tr class="bg-blue-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">배점</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">100</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">40</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">20</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">30</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">10</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">20</td>
-                </tr>
                 <tr>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">점수</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-blue-600 font-bold" data-field="totalScore">80</td>
@@ -108,7 +102,7 @@
             평가내용
         </h2>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table id="mstrListTable" class="min-w-full divide-y divide-gray-200">
                 <thead>
                 <tr class="bg-gray-50">
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">평가구분</th>
@@ -215,7 +209,7 @@
             </svg>
             고객과 대화내용
         </h2>
-        <div class="space-y-4">
+        <div id="conversationBox" class="space-y-4">
             <!-- 상담사 대화 -->
             <div class="flex items-start space-x-3">
                 <div class="flex-shrink-0">

@@ -22,7 +22,6 @@
             다운로드
         </button>
     </div>
-    <!-- 기존 컨텐츠 -->
     <!-- 1. 대표정보 섹션 -->
     <div class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">

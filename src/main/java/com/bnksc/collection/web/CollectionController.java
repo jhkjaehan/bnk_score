@@ -89,6 +89,21 @@ public class CollectionController extends BaseController {
     public String selectMstrNonpayList(@RequestParam Map<String, Object> params, @RequestParam(required = false) String sortOrder, Model model) {
 
         try {
+            // 리텐션 - 고객의향 검색조건 관련 세팅
+            Object intentionObj = params.get("intentions");
+            if(intentionObj != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    // JSON 배열 문자열인 경우
+                    String[] intentions = mapper.readValue(intentionObj.toString(), String[].class);
+                    params.put("intentions", intentions);
+                } catch (Exception e) {
+                    // 단일 문자열인 경우
+                    params.put("intentions", new String[]{intentionObj.toString()});
+                }
+            }
+
+            // 사후 해피콜 관련 세팅
             Object taskIdObj = params.get("taskId");
             if(taskIdObj != null) {
                 ObjectMapper mapper = new ObjectMapper();
