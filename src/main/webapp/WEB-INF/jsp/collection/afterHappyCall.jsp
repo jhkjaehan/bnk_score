@@ -187,11 +187,6 @@
           <label class="block text-sm font-medium text-gray-700">상품</label>
           <select name="product" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             <option value="">전체</option>
-            <option value="소매">소매</option>
-            <option value="오토_신차">오토_신차</option>
-            <option value="오토_중고차">오토_중고차</option>
-            <option value="오토_렌터카">오토_렌터카</option>
-            <option value="오토_리스">오토_리스</option>
           </select>
         </div>
 

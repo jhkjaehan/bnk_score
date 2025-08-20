@@ -224,8 +224,8 @@ function selectCallChartData() {
     var searchForm = $("#statsSearchForm").serializeArray();
 
     const data = searchForm;
-    data.push({name: 'taskId', value: "TA0005"});
-    data.push({name: 'typeId', value: "T0002"});
+    data.push({name: 'taskId', value: JSON.stringify(['TA0004','TA0005','TA0006','TA0007','TA0008'])});
+    data.push({name: 'typeId', value: JSON.stringify(["T0020","T0027"])});
 
     $.ajax({
         url: '/common/selectCallChartData.do',
@@ -233,9 +233,13 @@ function selectCallChartData() {
         data: data,
         success: function(response) {
             console.log(response);
-            initChartData(response.callChartData,"TA0005","CALL");
-            initChartData(response.scoreChartData,"TA0005","SCORE");
-            initChartData(response.problemChartData,"TA0005","PROBLEM");
+            const callData = sumCallData(response.callChartData);
+            response.callChartData = callData;
+            const problemData = sumProblemData(response.problemChartData,callData);
+            response.problemChartData = problemData;
+            initChartData(callData,"","CALL");
+            initChartData(response.scoreChartData,"","SCORE");
+            initChartData(problemData,"","PROBLEM");
 
             initSheetData(response);
 
@@ -248,31 +252,147 @@ function selectCallChartData() {
     })
 }
 
+// 차트 제거 함수
+function destroyCharts() {
+    // 각 차트 인스턴스가 존재하면 제거
+    if (callsChart) {
+        callsChart.destroy();
+        callsChart = null;
+    }
+    if (scoreChart) {
+        scoreChart.destroy();
+        scoreChart = null;
+    }
+    if (issueChart) {
+        issueChart.destroy();
+        issueChart = null;
+    }
+}
+
+function initChartData(data,taskId,type) {
+    var taskId = taskId ? taskId : '';
+    if(data == null || data == undefined || data.length == 0) {
+        console.log("error! 데이터가 없습니다.");
+        if(type == "CALL") {
+            callsChartData = null;
+        } else if(type == "SCORE") {
+            scoreChartData = null;
+        } else if(type == "PROBLEM") {
+            problemChartData = null;
+        }
+        return false;
+    }
+
+    let chartData = data;
+    /*if(taskId != null && taskId != '') {
+        chartData = data.filter(row => {
+            return row.taskId == taskId;
+        });
+    }*/
+
+    if(type == "CALL") {
+        callsChartData = chartData;
+    } else if(type == "SCORE") {
+        scoreChartData = chartData;
+    } else if(type == "PROBLEM") {
+        problemChartData = chartData;
+    }
+
+}
+
 // 차트 초기화
 function initializeCharts() {
+    // 기존 차트 제거
+    destroyCharts();
+
+    const callNameList = [];
+    const callCntList = [];
+    callsChartData.forEach(row => {
+        callNameList.push(row.name);
+        callCntList.push(row.cnt);
+    })
+    const callMaxDt = Math.max(...callCntList);
     // 콜수/고객수/상담수 차트
-    const callsChart = new Chart(document.getElementById('callsChart'), {
+    callsChart = new Chart($('#callsChart'), {
         type: 'bar',
         data: {
-            labels: ['전체', '소매', '오토_신차', '오토_중고차', '오토_렌터카', '오토_리스'],
+            labels: callNameList,
             datasets: [{
                 label: '콜 수',
-                data: [1000, 200, 300, 250, 150, 100],
-                backgroundColor: 'rgba(59, 130, 246, 0.5)'
+                data: callCntList,
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ]
+            }]
+        },
+        options: {
+            indexAxis: 'y',  // 가로 막대 차트
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: callMaxDt,
+                    title: {
+                        display: true,
+                        text: 'Count'
+                    }
+                }
+            }
+        }
+    });
+
+    const scoreNameList = [];
+    const scoreCntList = [];
+    scoreChartData.forEach(row => {
+        scoreNameList.push(row.name);
+        scoreCntList.push(row.avgScore);
+    })
+    const scoreMaxDt = Math.max(...scoreCntList);
+
+    // 평균 스크립트 Score 차트
+    scoreChart = new Chart($('#scoreChart'), {
+        type: 'bar',
+        data: {
+            labels: scoreNameList,
+            datasets: [{
+                data: scoreCntList,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(255, 205, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(54, 162, 235, 0.7)'
+                ]
             }]
         },
         options: {
             responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '점수'
+                    }
                 }
             }
         }
     });
 
     // 스크립트 Score 차트
-    const scoreChart = new Chart(document.getElementById('scoreChart'), {
+    /*const scoreChart = new Chart(document.getElementById('scoreChart'), {
         type: 'line',
         data: {
             labels: ['전체', '소매', '오토_신차', '오토_중고차', '오토_렌터카', '오토_리스'],
@@ -286,10 +406,10 @@ function initializeCharts() {
         options: {
             responsive: true
         }
-    });
+    });*/
 
     // 문제소지 콜 차트
-    const issueChart = new Chart(document.getElementById('issueChart'), {
+    /*const issueChart = new Chart(document.getElementById('issueChart'), {
         type: 'doughnut',
         data: {
             labels: ['정상', '수수료/이면약정', '계약외지원약속'],
@@ -305,9 +425,214 @@ function initializeCharts() {
         options: {
             responsive: true
         }
+    });*/
+
+    const problemNameList = [];
+    const problemCntList = [];
+
+    problemChartData.forEach(row => {
+        problemNameList.push(row.name);
+        problemCntList.push(row.ratio);
+    })
+    //const problemMaxDt = Math.max(...problemCntList);
+
+    // 문제소지 콜수 비중 차트
+    issueChart = new Chart($('#issueChart'), {
+        type: 'bar',
+        data: {
+            labels: problemNameList,
+            datasets: [{
+                data: problemCntList,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: '비중(%)'
+                    }
+                }
+            }
+        }
     });
 }
 
+function initSheetData(response) {
+    let callSheetData = response.callChartData;
+    let scoreSheetData = response.scoreChartData;
+    let problemSheetData = response.problemChartData;
+
+    //callSheetData = callSheetData.filter(row => { return row.taskId === 'TA0004'; });
+
+    sampleData = [];
+
+    callSheetData.forEach(row => {
+        sampleData.push({category:"전체", item:row.name,measure:row.cnt,ratio:row.ratio,rowspan: callSheetData.length});
+    })
+
+    scoreSheetData.forEach(row => {
+        sampleData.push({category:"평균 스크립트 Score", item:row.name,measure:row.avgScore,ratio:"",rowspan: scoreSheetData.length});
+    })
+
+    problemSheetData.forEach(row => {
+        sampleData.push({category:"문제소지 콜", item:row.name,measure:row.cnt,ratio:row.ratio,rowspan: problemSheetData.length});
+    })
+
+    renderStatsDetailGrid(sampleData);
+}
+
+
+// 상세 통계 그리드 데이터 생성 함수
+function renderStatsDetailGrid(data) {
+    const tbody = $('#statsDetailGrid');
+    tbody.empty();
+
+    // 데이터 그룹화를 위한 현재 구분값 추적
+    let currentCategory = '';
+    let preCategory = "";
+
+
+    data.forEach((row, index) => {
+        let rowspanYn = true;
+        if((row.category === preCategory) || (row.rowspan <= 1)) {
+            rowspanYn = false;
+        }
+        preCategory = row.category;
+
+        const tr = $('<tr>').addClass(index % 2 === 0 ? 'bg-white' : 'bg-gray-50');
+
+        // 구분이 변경될 때마다 스타일 적용
+        if (currentCategory !== row.category) {
+            currentCategory = row.category;
+            tr.addClass('border-t-2 border-gray-300');
+        }
+
+        let tdCategory ='';
+        if(rowspanYn) {
+            tdCategory = $('<td rowspan="'+row.rowspan+'">').addClass('px-6 py-4 whitespace-nowrap bg-indigo-50');
+        } else if (row.rowspan === 1) {
+            tdCategory = $('<td>').addClass('px-6 py-4 whitespace-nowrap bg-indigo-50');
+        }
+        // 구분 열
+        if (currentCategory === row.category) {
+            if(tdCategory != '') {
+                // 구분 스타일
+                tdCategory.html(`
+                    <div class="flex items-center">
+                        <div class="text-sm font-medium text-gray-900">${row.category}</div>
+                    </div>
+                `);
+            }
+        }
+
+        // 항목 열
+        const tdItem = $('<td>').addClass('px-6 py-4 whitespace-nowrap bg-indigo-50').html(`
+            <div class="flex items-center">
+                <div class="text-sm font-medium text-gray-900">${row.item}</div>
+            </div>
+        `);
+
+        // 측정치 열
+        const tdMeasure = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
+            <div class="text-sm text-gray-900">${numberWithCommas(row.measure)}</div>
+        `);
+
+        // 비중 열
+        const tdRatio = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
+            <div class="text-sm text-gray-900">${row.ratio ? row.ratio.toFixed(1) : ''}</div>
+        `);
+
+        tr.append(tdCategory, tdItem, tdMeasure, tdRatio);
+        tbody.append(tr);
+    });
+}
+
+
+
+// 숫자 포맷팅 함수
+function numberWithCommas(x) {
+    // 숫자를 문자열로 변환 후 소수점 기준 분리
+    const parts = x.toString().split(".");
+    // 정수 부분에만 콤마 적용
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    // 소수 부분이 있으면 다시 합침
+    return parts.join(".");
+}
+
+function sumCallData(data) {
+    if (!data || !data.length) return [];
+    // 같은 name 끼리 cnt 합산
+    const sumByName = data.reduce((acc, curr) => {
+        if (!acc[curr.name]) {
+            acc[curr.name] = {
+                cnt: 0,
+                name: curr.name
+            };
+        }
+        acc[curr.name].cnt += curr.cnt;
+        return acc;
+
+    }, {});
+
+    // 결과 배열로 변환
+    let result = Object.values(sumByName);
+
+    // '콜수' 찾기
+    const totalCalls = result.find(item => item.name === '콜수')?.cnt || 0;
+
+    // ratio 계산 및 최종 결과 반환
+    result = result.map(item => ({
+        ...item,
+        ratio: totalCalls ? Math.round((item.cnt * 100.0) / totalCalls * 10) / 10 : 0
+    }));
+
+    return result;
+}
+
+function sumProblemData(data,callData) {
+    if (!data || !data.length) return [];
+
+    const sumByName = data.reduce((acc, curr) => {
+        if (!acc[curr.name]) {
+            acc[curr.name] = {
+                cnt: 0,
+                name: curr.name
+            };
+        }
+        acc[curr.name].cnt += curr.cnt;
+        return acc;
+
+    }, {});
+
+    // 결과 배열로 변환
+    let result = Object.values(sumByName);
+
+    // '콜수' 찾기
+    const totalCalls = callData.find(row => row.name === "콜수")?.cnt || 0;
+
+    // ratio 계산 및 최종 결과 반환
+    result = result.map(item => ({
+        ...item,
+        ratio: totalCalls ? Math.round((item.cnt * 100.0) / totalCalls * 10,1) / 10 : 0
+    }));
+
+    return result;
+}
 
 function bindEvent() {
 
@@ -360,6 +685,6 @@ function bindEvent() {
     // 통계 검색 폼 제출 이벤트
     $('#statsSearchForm').submit(function(e) {
         e.preventDefault();
-        searchStats();
+        loadChartData();
     });
 }

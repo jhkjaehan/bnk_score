@@ -1,6 +1,7 @@
 package com.bnksc.common.web;
 
 import com.bnksc.common.service.CommonService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -101,6 +102,34 @@ public class CommonController {
         try {
             // 서비스 호출
             model.addAttribute("status", "success");
+
+            // 사후 해피콜 관련 세팅
+            Object taskIdObj = params.get("taskId");
+            if(taskIdObj != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    // JSON 배열 문자열인 경우
+                    String[] taskIds = mapper.readValue(taskIdObj.toString(), String[].class);
+                    params.put("taskId", taskIds);
+                } catch (Exception e) {
+                    // 단일 문자열인 경우
+                    params.put("taskId", new String[]{taskIdObj.toString()});
+                }
+            }
+
+            // 사후 해피콜 관련 세팅
+            Object typeIdObj = params.get("typeId");
+            if(typeIdObj != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    // JSON 배열 문자열인 경우
+                    String[] typeIds = mapper.readValue(typeIdObj.toString(), String[].class);
+                    params.put("typeId", typeIds);
+                } catch (Exception e) {
+                    // 단일 문자열인 경우
+                    params.put("typeId", new String[]{typeIdObj.toString()});
+                }
+            }
 
             Object callChartData = commonService.selectCallChartData(params);
             Object scoreChartData = commonService.selectScoreChartData(params);

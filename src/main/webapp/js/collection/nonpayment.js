@@ -58,6 +58,7 @@ function searchNonpayList(page) {
     })
 }
 
+//화면 로드
 function loadPage() {
     //상담사 목록
     getCounselorList();
@@ -234,9 +235,12 @@ function initChartData(data,taskId,type) {
         return false;
     }
 
-    const chartData = data.filter(row => {
-        return row.taskId == taskId;
-    });
+    let chartData = data;
+    /*if(taskId != null && taskId != '') {
+        chartData = data.filter(row => {
+            return row.taskId == taskId;
+        });
+    }*/
 
     if(type == "CALL") {
         callsChartData = chartData;

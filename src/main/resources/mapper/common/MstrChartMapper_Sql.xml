@@ -14,7 +14,10 @@
         on v.CALL_ID = c.call_id
         <where>
             <if test="taskId != null and taskId != ''">
-                AND v.TASK_ID = #{taskId}
+                AND v.TASK_ID IN
+                <foreach item="item" collection="taskId" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
             </if>
             <if test="startDate != null and startDate !=''">
                 AND C.CALL_DT <![CDATA[ >= ]]> STR_TO_DATE(#{startDate},'%Y-%m-%d')
@@ -25,6 +28,9 @@
             </if>
             <if test="counselor != null and counselor != ''">
                 AND C.COUNSELOR_CD = #{counselor}
+            </if>
+            <if test="product != null and product != ''">
+                AND v.TASK_ID = #{product}
             </if>
         </where>
         group by v.TASK_ID)
@@ -50,10 +56,8 @@
 
     <select id="selectScoreChartData" parameterType="hashmap" resultType="hashmap">
     <!-- MstrChart.selectScoreChartData -->
-        SELECT A.TASK_ID AS "taskId"
-             , A.SCORE_ID AS "scoreId"
-             , B.NAME AS "name"
-             , AVG(A.SCORE_VALUE) AS "avgScore"
+        SELECT B.NAME AS "name"
+        , AVG(A.SCORE_VALUE) AS "avgScore"
         FROM MSTR_ANALYSIS_SCORE A
         LEFT JOIN MSTR_EVAL_SCORE_CONTENT B
         ON A.TASK_ID = B.TASK_ID
@@ -62,9 +66,13 @@
         ON A.CALL_ID = C.CALL_ID
         <where>
             <if test="taskId != null and taskId != ''">
-                AND A.TASK_ID = #{taskId}
+                AND A.TASK_ID IN
+                <foreach item="item" collection="taskId" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
             </if>
-            <if test="taskId == 'TA0001'">
+            <if test="taskId[0] == 'TA0001'">
+                <!-- 미납안내의 경우 오안내 점수 제외 -->
                 AND A.SCORE_ID NOT IN ('S0006')
             </if>
             <if test="startDate != null and startDate !=''">
@@ -77,9 +85,11 @@
             <if test="counselor != null and counselor != ''">
                 AND C.COUNSELOR_CD = #{counselor}
             </if>
+            <if test="product != null and product != ''">
+                AND A.TASK_ID = #{product}
+            </if>
         </where>
-        GROUP BY A.TASK_ID, A.SCORE_ID
-        ORDER BY A.TASK_ID, A.SCORE_ID
+        GROUP BY B.NAME
     </select>
 
     <select id="selectProblemChartData" parameterType="hashmap" resultType="hashmap">
@@ -147,10 +157,19 @@
         )
         <where>
             <if test="taskId != null and taskId != ''">
-                AND a.TASK_ID = #{taskId}
+                AND a.TASK_ID IN
+                <foreach item="item" collection="taskId" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
             </if>
             <if test="typeId != null and typeId != ''">
-                AND a.TYPE_ID = #{typeId}
+                AND a.TYPE_ID IN
+                <foreach item="item" collection="typeId" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="product != null and product != ''">
+                AND a.TASK_ID = #{product}
             </if>
         </where>
     </select>
