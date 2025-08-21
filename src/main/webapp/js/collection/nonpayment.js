@@ -185,24 +185,6 @@ function selectCallChartData() {
     })
 }
 
-/*
-function selectScoreChartData() {
-
-    $.ajax({
-        url: '/common/selectScoreChartData.do',
-        method: 'POST',
-        data: {taskId:"TA0001"},
-        success: function(response) {
-            const data = response.data;
-            initChartData(data,"TA0001","SCORE");
-        },
-        error: function(xhr, status, error) {
-            console.error('데이터 조회 실패:', error);
-            alert('데이터 조회 중 오류가 발생했습니다.');
-        }
-    })
-}
-*/
 
 // 차트 제거 함수
 function destroyCharts() {
@@ -401,25 +383,6 @@ function downloadStats() {
             alert('엑셀 다운로드 중 오류가 발생했습니다.');
         }
     });
-}
-
-// 차트 데이터 업데이트 함수
-function updateCharts(newData) {
-    // 기존 차트들이 존재하는지 확인하고 업데이트
-    if (!callsChart || !scoreChart || !issueChart) {
-        initializeCharts();
-        return;
-    }
-
-    // 각 차트 데이터 업데이트
-    callsChart.data = newData.callsData;
-    callsChart.update();
-
-    scoreChart.data = newData.scoreData;
-    scoreChart.update();
-
-    issueChart.data = newData.issueData;
-    issueChart.update();
 }
 
 

@@ -246,7 +246,7 @@
 
     <!-- 그래프 영역 -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-      <div class="grid grid-cols-3 gap-6">
+      <div class="grid grid-cols-2 gap-6">
         <!-- 콜수/고객수/상담수 차트 -->
         <div class="w-full">
           <h3 class="text-lg font-medium text-gray-900 mb-4">상담 현황</h3>
@@ -254,14 +254,14 @@
         </div>
         <!-- 평균 스크립트 Score 차트 -->
         <div class="w-full">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">스크립트 점수</h3>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">진행상태별 고객 수</h3>
           <canvas id="scoreChart"></canvas>
         </div>
         <!-- 문제소지 콜수 비중 차트 -->
-        <div class="w-full">
+        <%--<div class="w-full">
           <h3 class="text-lg font-medium text-gray-900 mb-4">문제소지 콜 비중</h3>
           <canvas id="issueChart"></canvas>
-        </div>
+        </div>--%>
       </div>
     </div>
 
@@ -285,7 +285,9 @@
           <tr class="bg-gray-50">
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">구분</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">항목</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">측정치</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">콜수</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">비중(%)</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">고객수</th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">비중(%)</th>
           </tr>
           </thead>

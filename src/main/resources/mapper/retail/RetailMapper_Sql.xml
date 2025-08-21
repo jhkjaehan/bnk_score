@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Retail">
+
+    <sql id="whereSelectCall">
+        <if test="startDate != null and startDate !=''">
+            AND B.CALL_DT <![CDATA[ >= ]]> STR_TO_DATE(#{startDate},'%Y-%m-%d')
+        </if>
+        <if test="endDate != null and endDate !=''">
+            AND B.CALL_DT <![CDATA[ <= ]]> STR_TO_DATE(#{endDate},'%Y-%m-%d')
+        </if>
+        <if test="counselor != null and counselor != ''">
+            AND B.COUNSELOR_CD = #{counselor}
+        </if>
+    </sql>
+
+    <select id="selectCallChartData" parameterType="hashmap" resultType="hashmap">
+        <!-- Retail.selectCallChartData -->
+        SELECT A.TASK_ID    AS "taskId"
+            , A.ITEM_ID     AS "itemId"
+            , A.ITEM_NAME   AS "itemName"
+            , A.CONTENT_ID  AS "contentId"
+            , A.CONTENT_NAME    AS "contentName"
+            , A.CALL_CNT    AS "callCnt"
+            , ROUND(A.CALL_CNT / MAX(A.CALL_CNT) OVER (PARTITION BY A.TASK_ID) * 100,1)  AS "callRto"
+            , A.CUST_CNT    AS "custCnt"
+            , ROUND(A.CUST_CNT / MAX(A.CUST_CNT) OVER (PARTITION BY A.TASK_ID) * 100,1)  AS "custRto"
+        FROM
+        (
+            SELECT v.TASK_ID
+                , 'I0000' AS ITEM_ID
+                , '전체' AS ITEM_NAME
+                , 'C0000' AS CONTENT_ID
+                , '전체' AS CONTENT_NAME
+                , count(distinct v.CALL_ID) AS CALL_CNT
+                , count(distinct B.CUST_NUM) AS CUST_CNT
+            FROM v_mstr_call_task v join mstr_call B
+            ON v.CALL_ID = B.call_id
+           <where>
+               <include refid="whereSelectCall"/>
+           </where>
+            GROUP BY TASK_ID
+            UNION
+            SELECT
+                MEC.TASK_ID
+                , MEC.ITEM_ID
+                , MEI.NAME AS ITEM_NAME
+                , MEC.CONTENT_ID
+                , MEC.NAME AS CONTENT_NAME
+                , IFNULL(GR.CALL_CNT,0) AS CALL_CNT
+                , IFNULL(GR.CUST_CNT,0) AS CUST_CNT
+            FROM MSTR_EVAL_CONTENT MEC
+            LEFT JOIN MSTR_EVAL_ITEM MEI
+            ON MEC.TASK_ID = MEI.TASK_ID
+            AND MEC.TYPE_ID = MEI.TYPE_ID
+            AND MEC.ITEM_ID = MEI.ITEM_ID
+            LEFT JOIN
+            (
+                SELECT
+                    A.TASK_ID
+                    , A.ITEM_ID AS ITEM_ID
+                    , A.CONTENT_ID
+                    , COUNT(distinct A.CALL_ID) AS CALL_CNT
+                    , COUNT(distinct B.CUST_NUM) AS CUST_CNT
+                FROM mstr_analysis_result A
+                LEFT JOIN mstr_call B
+                ON A.CALL_ID = B.CALL_ID
+                WHERE A.result_value = 'Y'
+                <include refid="whereSelectCall"/>
+                GROUP BY A.TASK_ID, A.ITEM_ID, A.CONTENT_ID
+            ) GR
+            ON MEC.TASK_ID = GR.TASK_ID
+            AND MEC.ITEM_ID = GR.ITEM_ID
+            AND MEC.CONTENT_ID = GR.CONTENT_ID
+        ) A
+        WHERE A.task_id = 'TA0002'
+        AND A.ITEM_ID IN ('I0000','I0010','I0011', 'I0012')
+        AND A.CONTENT_ID NOT IN ('C0036')
+        ORDER BY A.TASK_ID, A.ITEM_ID, A.CONTENT_ID
+    </select>
+
+</mapper>

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -43,4 +44,20 @@ public class RetailController extends BaseController {
         return "/retail/excellentLoanDetail";
     }
 
+    @RequestMapping(value="/retail/selectCallChartData.do")
+    public String selectCallChartData(@RequestParam Map<String, Object> params, Model model) {
+        try {
+
+            // 서비스 호출
+            Object result = retailService.selectCallChartData(params);
+            model.addAttribute("status", "success");
+            model.addAttribute("data", result);
+
+        } catch (Exception e) {
+            model.addAttribute("status", "error");
+            model.addAttribute("message", e.getMessage());
+        }
+
+        return "jsonView";
+    }
 }
