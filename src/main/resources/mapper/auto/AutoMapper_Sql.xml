@@ -3,4 +3,99 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="Auto">
 
+    <sql id="whereSelectCall">
+        <if test="startDate != null and startDate !=''">
+            AND B.CALL_DT <![CDATA[ >= ]]> STR_TO_DATE(#{startDate},'%Y-%m-%d')
+        </if>
+        <if test="endDate != null and endDate !=''">
+            AND B.CALL_DT <![CDATA[ <= ]]> STR_TO_DATE(#{endDate},'%Y-%m-%d')
+        </if>
+        <if test="counselor != null and counselor != ''">
+            AND B.COUNSELOR_CD = #{counselor}
+        </if>
+    </sql>
+
+    <select id="selectCallChartData" parameterType="hashmap" resultType="hashmap">
+        <!-- Auto.selectCallChartData -->
+        SELECT A.TASK_ID    AS "taskId"
+            , A.ITEM_ID     AS "itemId"
+            , A.ITEM_NAME   AS "itemName"
+            , A.CONTENT_ID  AS "contentId"
+            , A.CONTENT_NAME    AS "contentName"
+            , A.CALL_CNT    AS "callCnt"
+            , ROUND(A.CALL_CNT / MAX(A.CALL_CNT) OVER (PARTITION BY A.TASK_ID) * 100,1)  AS "callRto"
+            , A.CUST_CNT    AS "custCnt"
+            , ROUND(A.CUST_CNT / MAX(A.CUST_CNT) OVER (PARTITION BY A.TASK_ID) * 100,1)  AS "custRto"
+            , A.EXP_CUST_COUNT    AS "expCustCnt"
+            , ROUND(A.EXP_CUST_COUNT / MAX(A.EXP_CUST_COUNT) OVER (PARTITION BY A.TASK_ID) * 100,1)  AS "expCustRto"
+        FROM
+        (
+            SELECT v.TASK_ID
+                , 'I0000' AS ITEM_ID
+                , '전체' AS ITEM_NAME
+                , 'C0000' AS CONTENT_ID
+                , '전체' AS CONTENT_NAME
+                , COUNT(distinct v.CALL_ID) AS CALL_CNT
+                , COUNT(distinct B.CUST_NUM) AS CUST_CNT
+                , COUNT(DISTINCT CASE WHEN C.RESULT_VALUE IS NOT NULL THEN B.CUST_NUM END) AS EXP_CUST_COUNT
+            FROM v_mstr_call_task v join mstr_call B
+            ON v.CALL_ID = B.CALL_ID
+            LEFT JOIN mstr_analysis_result C
+            ON B.CALL_ID = C.CALL_ID
+            AND C.CONTENT_ID IN ('C0118')
+            <include refid="whereSelectCall"/>
+            GROUP BY v.TASK_ID
+            UNION
+            SELECT
+                MEC.TASK_ID
+                , MEC.ITEM_ID
+                , MEI.NAME AS ITEM_NAME
+                , MEC.CONTENT_ID
+                , MEC.NAME AS CONTENT_NAME
+                , IFNULL(GR.CALL_CNT,0) AS CALL_CNT
+                , IFNULL(GR.CUST_CNT,0) AS CUST_CNT
+                , IFNULL(GR.EXP_CUST_COUNT,0) AS EXP_CUST_COUNT
+            FROM MSTR_EVAL_CONTENT MEC
+            LEFT JOIN MSTR_EVAL_ITEM MEI
+            ON MEC.TASK_ID = MEI.TASK_ID
+            AND MEC.TYPE_ID = MEI.TYPE_ID
+            AND MEC.ITEM_ID = MEI.ITEM_ID
+            LEFT JOIN
+            (
+                SELECT
+                    A.TASK_ID
+                    , A.ITEM_ID AS ITEM_ID
+                    , A.CONTENT_ID
+                    , COUNT(distinct A.CALL_ID) AS CALL_CNT
+                    , COUNT(distinct B.CUST_NUM) AS CUST_CNT
+                    , COUNT(DISTINCT CASE WHEN C.RESULT_VALUE IS NOT NULL THEN C.CUST_NUM END) AS EXP_CUST_COUNT
+                FROM mstr_analysis_result A
+                LEFT JOIN mstr_call B
+                ON A.CALL_ID = B.CALL_ID
+                LEFT JOIN (
+                    SELECT A.CUST_NUM
+                        , MAX(B.RESULT_VALUE) AS RESULT_VALUE
+                    FROM mstr_call A
+                    LEFT JOIN mstr_analysis_result B
+                    ON A.CALL_ID = B.CALL_ID
+                    AND B.TASK_ID = 'TA0003'
+                    AND B.CONTENT_ID = 'C0118'
+                    GROUP BY A.CUST_NUM
+                    HAVING MAX(B.RESULT_VALUE) IS NOT NULL
+                ) C
+                ON B.CUST_NUM = C.CUST_NUM
+                WHERE A.result_value = 'Y'
+                <include refid="whereSelectCall"/>
+                GROUP BY A.TASK_ID, A.ITEM_ID, A.CONTENT_ID
+            ) GR
+            ON MEC.TASK_ID = GR.TASK_ID
+            AND MEC.ITEM_ID = GR.ITEM_ID
+            AND MEC.CONTENT_ID = GR.CONTENT_ID
+        ) A
+        WHERE A.task_id = 'TA0003'
+        AND A.ITEM_ID IN ('I0000','I0017','I0018', 'I0021')
+        AND A.CONTENT_ID NOT IN ('C0053')
+        ORDER BY A.TASK_ID, A.ITEM_ID, A.CONTENT_ID
+    </select>
+
 </mapper>

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +43,23 @@ public class AutoController extends BaseController {
     public String retentionDetailPage(HttpServletRequest request, Model model) {
         Map<String, Object> params = getParams(request);
         return "/auto/retentionDetail";
+    }
+
+    @RequestMapping(value="/auto/selectCallChartData.do")
+    public String selectCallChartData(@RequestParam Map<String, Object> params, Model model) {
+        try {
+
+            // 서비스 호출
+            Object result = autoService.selectCallChartData(params);
+            model.addAttribute("status", "success");
+            model.addAttribute("data", result);
+
+        } catch (Exception e) {
+            model.addAttribute("status", "error");
+            model.addAttribute("message", e.getMessage());
+        }
+
+        return "jsonView";
     }
 
     /*
