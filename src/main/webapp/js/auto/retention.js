@@ -21,7 +21,7 @@ $(document).ready(function() {
 
 function loadPage() {
     //상담사 목록
-    getCounselorList();
+    getCounselorList("TA0003");
     //목록조회
     searchList();
 }
@@ -192,10 +192,17 @@ function loadChartData() {
 function selectCallChartData() {
 
     var searchForm = $("#statsSearchForm").serializeArray();
+    var checkedIntentions = [];
+    $("#statsSearchForm").find("input[name=intention]:checked").each(function() {
+        if($(this).val()){
+            checkedIntentions.push($(this).val());
+        }
+    })
 
     const data = searchForm;
     data.push({name: 'taskId', value: "TA0003"});
     data.push({name: 'typeId', value: ""});
+    data.push({name: 'intentions', value: JSON.stringify(checkedIntentions)});
 
     $.ajax({
         url: '/auto/selectCallChartData.do',
@@ -320,23 +327,40 @@ function initializeCharts() {
 
 
     const scoreNameList = [];
-    const scoreCntList = [];
+    //const scoreCntList = [];
+    const scoreCntList1 = []; // 상담 고객수
+    const scoreCntList2 = []; // 만기 고객수
     const scData = callsChartData.filter(data => {
-        return data.itemId == "I0010";
+        return data.itemId == "I0017";
     });
 
     scData.forEach(row => {
         scoreNameList.push(row.contentName);
-        scoreCntList.push(row.custCnt);
+        scoreCntList1.push(row.custCnt);
+        scoreCntList2.push(row.expCustCnt);
     })
-    const scoreMaxDt = Math.max(...scoreCntList);
+
+    const scoreMaxDt = Math.max(
+        ...scoreCntList1.concat(scoreCntList2)
+    );
 
     // 평균 스크립트 Score 차트
     scoreChart = new Chart($('#scoreChart'), {
         type: 'bar',
         data: {
             labels: scoreNameList,
-            datasets: [{
+            datasets: [
+                {
+                    label: '상담 고객수',
+                    data: scoreCntList1,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)' // 파란색
+                },
+                {
+                    label: '만기 고객수',
+                    data: scoreCntList2,
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)' // 빨간색
+                }
+                /*{
                 data: scoreCntList,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.7)',
@@ -345,7 +369,8 @@ function initializeCharts() {
                     'rgba(75, 192, 192, 0.7)',
                     'rgba(54, 162, 235, 0.7)'
                 ]
-            }]
+                }*/
+            ]
         },
         options: {
             responsive: true,
@@ -434,7 +459,16 @@ function initSheetData(data) {
         console.log(filteredData);
         console.log("row");
         console.log(row);
-        sampleData.push({category:row.itemName, item:row.contentName,callCnt:row.callCnt,callRto:row.callRto,custCnt:row.custCnt,custRto:row.custRto,rowspan: filteredData.length})
+        sampleData.push({
+            category:row.itemName
+            , item:row.contentName
+            ,callCnt:row.callCnt
+            ,callRto:row.callRto
+            ,custCnt:row.custCnt
+            ,custRto:row.custRto
+            ,expCustCnt:row.expCustCnt
+            ,expCustRto:row.expCustRto
+            ,rowspan: filteredData.length})
     })
     console.log("sheetData2");
     console.log(sheetData);
@@ -511,7 +545,7 @@ function renderStatsDetailGrid(data) {
 
         // 비중 열
         const tdCallRto = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
-            <div class="text-sm text-gray-900">${row.callRto ? row.callRto.toFixed(1) : ''}</div>
+            <div class="text-sm text-gray-900">${row.callRto ? row.callRto.toFixed(1) : 0}</div>
         `);
 
         // 측정치 열
@@ -521,10 +555,20 @@ function renderStatsDetailGrid(data) {
 
         // 비중 열
         const tdCustRto = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
-            <div class="text-sm text-gray-900">${row.custRto ? row.custRto.toFixed(1) : ''}</div>
+            <div class="text-sm text-gray-900">${row.custRto ? row.custRto.toFixed(1) : 0}</div>
         `);
 
-        tr.append(tdCategory, tdItem, tdCallCnt, tdCallRto, tdCustCnt, tdCustRto);
+        // 측정치 열
+        const tdExpCustCnt = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
+            <div class="text-sm text-gray-900">${numberWithCommas(row.expCustCnt)}</div>
+        `);
+
+        // 비중 열
+        const tdExpCustRto = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
+            <div class="text-sm text-gray-900">${row.expCustRto ? row.expCustRto.toFixed(1) : 0}</div>
+        `);
+
+        tr.append(tdCategory, tdItem, tdCallCnt, tdCallRto, tdCustCnt, tdCustRto, tdExpCustCnt, tdExpCustRto);
         tbody.append(tr);
     });
 }

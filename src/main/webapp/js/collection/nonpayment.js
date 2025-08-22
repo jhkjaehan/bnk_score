@@ -61,7 +61,7 @@ function searchNonpayList(page) {
 //화면 로드
 function loadPage() {
     //상담사 목록
-    getCounselorList();
+    getCounselorList("TA0001");
     //목록조회
     searchNonpayList();
 }

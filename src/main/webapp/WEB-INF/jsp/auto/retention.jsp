@@ -264,8 +264,6 @@
           <label class="block text-sm font-medium text-gray-700">상담사</label>
           <select name="counselor" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             <option value="">전체</option>
-            <option value="1">상담사1</option>
-            <option value="2">상담사2</option>
           </select>
         </div>
         <div>
@@ -276,23 +274,23 @@
               <span>전체</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="checkbox" name="intention" value="1" class="mr-1">
+              <input type="checkbox" name="intention" value="C0061" class="mr-1">
               <span>인수</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="checkbox" name="intention" value="2" class="mr-1">
+              <input type="checkbox" name="intention" value="C0060" class="mr-1">
               <span>반납</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="checkbox" name="intention" value="3" class="mr-1">
+              <input type="checkbox" name="intention" value="C0059" class="mr-1">
               <span>연장</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="checkbox" name="intention" value="4" class="mr-1">
+              <input type="checkbox" name="intention" value="C0062" class="mr-1">
               <span>승계</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="checkbox" name="intention" value="5" class="mr-1">
+              <input type="checkbox" name="intention" value="C0063" class="mr-1">
               <span>신규차량</span>
             </label>
           </div>
@@ -308,7 +306,7 @@
 
     <!-- 그래프 영역 -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-      <div class="grid grid-cols-3 gap-6">
+      <div class="grid grid-cols-2 gap-6">
         <!-- 콜수/고객수/상담수 차트 -->
         <div class="w-full">
           <h3 class="text-lg font-medium text-gray-900 mb-4">상담 현황</h3>
@@ -316,14 +314,14 @@
         </div>
         <!-- 평균 스크립트 Score 차트 -->
         <div class="w-full">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">스크립트 점수</h3>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">결정구분별 상담고객 수, 만기고객 수</h3>
           <canvas id="scoreChart"></canvas>
         </div>
         <!-- 문제소지 콜수 비중 차트 -->
-        <div class="w-full">
+        <%--<div class="w-full">
           <h3 class="text-lg font-medium text-gray-900 mb-4">문제소지 콜 비중</h3>
           <canvas id="issueChart"></canvas>
-        </div>
+        </div>--%>
       </div>
     </div>
 
@@ -347,8 +345,12 @@
           <tr class="bg-gray-50">
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">구분</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">항목</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">측정치</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">콜수</th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">비중(%)</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">상담 고객 수</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">비중(%)</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">만기 고객 수</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">비중(%)</th>
           </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200" id="statsDetailGrid">

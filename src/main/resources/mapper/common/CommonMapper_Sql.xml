@@ -8,25 +8,37 @@
     <select id="selectCounselorList" parameterType="hashmap" resultType="hashmap">
         <!-- Common.selectCounselorList -->
         SELECT
-        counselor_cd AS "counselorCd",
-        name AS "name",
-        extension_num AS "extensionNum",
-        task_name AS "taskName",
-        reg_dt AS "regDt",
-        upd_dt AS "updDt"
-        FROM mstr_counselor
+            A.counselor_cd AS "counselorCd",
+            A.name AS "name",
+            A.extension_num AS "extensionNum",
+            A.task_name AS "taskName",
+            B.TASK_ID,
+            A.reg_dt AS "regDt",
+            A.upd_dt AS "updDt"
+        FROM mstr_counselor A
+        LEFT JOIN (
+        SELECT TASK_ID
+        , CASE NAME WHEN '우수고객 추가대출' THEN '우수추가대출'
+        WHEN '사후해피콜-소매' THEN '해피콜'
+        ELSE NAME END AS TASK_NAME
+        FROM mstr_task
+        ) B
+        ON A.task_name = B.TASK_NAME
         <where>
             <if test="counselorCd != null and counselorCd != ''">
-                AND counselor_cd = #{counselorCd}
+                AND A.counselor_cd = #{counselorCd}
             </if>
             <if test="name != null and name != ''">
-                AND name LIKE CONCAT('%', #{name}, '%')
+                AND A.name LIKE CONCAT('%', #{name}, '%')
             </if>
             <if test="taskName != null and taskName != ''">
-                AND task_name = #{taskName}
+                AND A.task_name = #{taskName}
+            </if>
+            <if test="taskId != null and taskId != ''">
+                AND B.TASK_ID = #{taskId}
             </if>
         </where>
-        ORDER BY reg_dt DESC
+        ORDER BY A.reg_dt DESC
     </select>
 
     <!-- resultType을 HashMap으로 지정 -->

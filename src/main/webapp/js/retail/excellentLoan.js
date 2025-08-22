@@ -21,7 +21,7 @@ $(document).ready(function() {
 
 function loadPage() {
     //상담사 목록
-    getCounselorList();
+    getCounselorList("TA0002");
     //목록조회
     searchList();
 }

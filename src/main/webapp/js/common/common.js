@@ -50,11 +50,11 @@ function resetSort() {
 }
 
 
-function getCounselorList(taskName) {
+function getCounselorList(taskId) {
     $.ajax({
         url: '/common/selectCounselorList.do',
         method: 'POST',
-        data: {taskName : taskName},
+        data: {taskId : taskId},
         success: function(response) {
             initCounselorList(response.data);
         },

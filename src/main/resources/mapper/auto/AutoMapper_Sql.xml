@@ -10,8 +10,32 @@
         <if test="endDate != null and endDate !=''">
             AND B.CALL_DT <![CDATA[ <= ]]> STR_TO_DATE(#{endDate},'%Y-%m-%d')
         </if>
+        <if test="startDateMatur != null and startDateMatur !=''">
+            AND IFNULL(STR_TO_DATE(C.RESULT_VALUE, '%Y%m%d%H%i'),
+            STR_TO_DATE(CONCAT(SUBSTRING(C.RESULT_VALUE, 1, 4), '-',
+            SUBSTRING(C.RESULT_VALUE, 5, 2),'-01'),'%Y-%m-%d'))
+            <![CDATA[ >= ]]>
+            #{startDateMatur}
+        </if>
+        <if test="endDateMatur != null and endDateMatur !=''">
+            AND IFNULL(STR_TO_DATE(C.RESULT_VALUE, '%Y%m%d%H%i'),
+            STR_TO_DATE(CONCAT(SUBSTRING(C.RESULT_VALUE, 1, 4), '-',
+            SUBSTRING(C.RESULT_VALUE, 5, 2),'-01'),'%Y-%m-%d'))
+            <![CDATA[ <= ]]>
+            #{endDateMatur}
+        </if>
         <if test="counselor != null and counselor != ''">
             AND B.COUNSELOR_CD = #{counselor}
+        </if>
+        <if test="intention != null and intention != ''">
+            AND A.CALL_ID IN (
+                SELECT CALL_ID FROM MSTR_ANALYSIS_RESULT
+                WHERE CONTENT_ID IN
+                <foreach item="item" collection="intentions" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                AND result_value = 'Y'
+            )
         </if>
     </sql>
 
@@ -30,21 +54,26 @@
             , ROUND(A.EXP_CUST_COUNT / MAX(A.EXP_CUST_COUNT) OVER (PARTITION BY A.TASK_ID) * 100,1)  AS "expCustRto"
         FROM
         (
-            SELECT v.TASK_ID
+            SELECT A.TASK_ID
                 , 'I0000' AS ITEM_ID
                 , '전체' AS ITEM_NAME
                 , 'C0000' AS CONTENT_ID
                 , '전체' AS CONTENT_NAME
-                , COUNT(distinct v.CALL_ID) AS CALL_CNT
+                , COUNT(distinct A.CALL_ID) AS CALL_CNT
                 , COUNT(distinct B.CUST_NUM) AS CUST_CNT
                 , COUNT(DISTINCT CASE WHEN C.RESULT_VALUE IS NOT NULL THEN B.CUST_NUM END) AS EXP_CUST_COUNT
-            FROM v_mstr_call_task v join mstr_call B
-            ON v.CALL_ID = B.CALL_ID
+            FROM v_mstr_call_task A join mstr_call B
+            ON A.CALL_ID = B.CALL_ID
+            <if test="counselor != null and counselor != ''">
+                AND B.COUNSELOR_CD = #{counselor}
+            </if>
             LEFT JOIN mstr_analysis_result C
             ON B.CALL_ID = C.CALL_ID
             AND C.CONTENT_ID IN ('C0118')
-            <include refid="whereSelectCall"/>
-            GROUP BY v.TASK_ID
+            <where>
+                <include refid="whereSelectCall"/>
+            </where>
+            GROUP BY A.TASK_ID
             UNION
             SELECT
                 MEC.TASK_ID

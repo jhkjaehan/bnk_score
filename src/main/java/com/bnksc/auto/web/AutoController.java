@@ -2,6 +2,7 @@ package com.bnksc.auto.web;
 
 import com.bnksc.auto.service.AutoService;
 import com.bnksc.common.web.BaseController;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,20 @@ public class AutoController extends BaseController {
     @RequestMapping(value="/auto/selectCallChartData.do")
     public String selectCallChartData(@RequestParam Map<String, Object> params, Model model) {
         try {
+            // 리텐션 - 고객의향 검색조건 관련 세팅
+            Object intentionObj = params.get("intentions");
+            if(intentionObj != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    // JSON 배열 문자열인 경우
+                    String[] intentions = mapper.readValue(intentionObj.toString(), String[].class);
+                    params.put("intentions", intentions);
+                } catch (Exception e) {
+                    // 단일 문자열인 경우
+                    params.put("intentions", new String[]{intentionObj.toString()});
+                }
+            }
+
 
             // 서비스 호출
             Object result = autoService.selectCallChartData(params);
