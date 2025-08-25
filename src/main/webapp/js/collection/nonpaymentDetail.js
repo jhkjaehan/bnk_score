@@ -1,3 +1,5 @@
+let CONTENT_LIST_DATA = null;
+
 $(document).ready(function () {
 
     selectMstrCallOne();
@@ -6,45 +8,45 @@ $(document).ready(function () {
     selectMstrConversation();
 })
 
-//상세화면 다운로드 (아직 미구현)
-function downloadDetails() {
+//상세화면 다운로드
+function downloadDetail() {
     // 현재 페이지의 데이터 수집
     const data = {
-        // 대표정보
+        // 대표정보 수집
         basicInfo: {
-            consultationDate: document.querySelector('[data-field="consultationDate"]').textContent,
-            customerNumber: document.querySelector('[data-field="customerNumber"]').textContent,
-            counselorNumber: document.querySelector('[data-field="counselorNumber"]').textContent,
-            counselorName: document.querySelector('[data-field="counselorName"]').textContent,
-            callNumber: document.querySelector('[data-field="callNumber"]').textContent
+            callDt: $("#detailMstrInfo").find("span[data-field=callDt]").text().trim(),
+            custNum: $("#detailMstrInfo").find("span[data-field=custNum]").text().trim(),
+            counselorCd: $("#detailMstrInfo").find("span[data-field=counselorCd]").text().trim(),
+            counselorName: $("#detailMstrInfo").find("span[data-field=counselorName]").text().trim(),
+            callId: $("#detailMstrInfo").find("span[data-field=callId]").text().trim(),
+            taskName: $("#detailMstrInfo").find("span[data-field=taskName]").text().trim()
         },
-        // 스크립트 Score
-        scoreInfo: {
-            total: document.querySelector('[data-field="totalScore"]').textContent,
-            identification: document.querySelector('[data-field="identificationScore"]').textContent,
-            greeting: document.querySelector('[data-field="greetingScore"]').textContent,
-            closing: document.querySelector('[data-field="closingScore"]').textContent,
-            essential: document.querySelector('[data-field="essentialScore"]').textContent,
-            mistake: document.querySelector('[data-field="mistakeScore"]').textContent
-        },
-        // 평가내용
+        // 스크립트 점수 수집
+        scoreInfo: [],
+        // 평가내용 수집
         evaluationInfo: []
     };
 
-    // 평가내용 테이블의 데이터 수집
-    const evaluationRows = document.querySelectorAll('[data-evaluation-row]');
-    evaluationRows.forEach(row => {
-        data.evaluationInfo.push({
-            category: row.querySelector('[data-field="category"]').textContent,
-            item: row.querySelector('[data-field="item"]').textContent,
-            content: row.querySelector('[data-field="content"]').textContent,
-            result: row.querySelector('[data-field="result"]').textContent
-        });
+
+    // 스크립트 점수 데이터 수집
+    $("#scoreTable tr").each(function() {
+        $(this).find("th,td").each(function(i) {
+            $(this).prop("tagName");
+            const score = {
+                order: i,
+                type: $(this).prop("tagName") == "TH" ? "col" : "row",
+                data: $(this).text().trim()
+            };
+            data.scoreInfo.push(score);
+        })
     });
 
-    // Excel 다운로드 요청
+    // 평가내용 데이터
+    data.evaluationInfo = CONTENT_LIST_DATA;
+
+    // 서버로 데이터 전송
     $.ajax({
-        url: '/collection/downloadNonpaymentDetail.do',
+        url: '/common/downloadDetail.do',
         method: 'POST',
         data: JSON.stringify(data),
         contentType: 'application/json',
@@ -52,18 +54,19 @@ function downloadDetails() {
             responseType: 'blob'
         },
         success: function(blob) {
+            // 파일 다운로드 처리
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `상담정보_${data.basicInfo.callNumber}.xlsx`;
+            a.download = `미납안내_${data.basicInfo.callId}.xlsx`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             a.remove();
         },
         error: function(xhr, status, error) {
+            console.error('다운로드 실패:', error);
             alert('다운로드 중 오류가 발생했습니다.');
-            console.error('Download error:', error);
         }
     });
 }
@@ -239,6 +242,8 @@ function loadMstrContentList(data) {
         console.log("error! 데이터가 없습니다.");
         return false;
     }
+
+    CONTENT_LIST_DATA = data;
 
     const template =
         "<tr>" +

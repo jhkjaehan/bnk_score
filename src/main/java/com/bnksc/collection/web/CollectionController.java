@@ -136,27 +136,6 @@ public class CollectionController extends BaseController {
         return "jsonView";
     }
 
-    /**
-     * 미납안내 상세화면 다운로드
-     * @param data
-     * @return
-     */
-    @RequestMapping(value="/collection/downloadNonpaymentDetail.do", method=RequestMethod.POST)
-    public ResponseEntity<byte[]> downloadNonpaymentDetail(@RequestBody Map<String, Object> data) {
-        try {
-            // Excel 파일 생성 로직
-            byte[] excelFile = excelService.createNonpaymentDetailExcel(data);
-
-            // 응답 헤더 설정
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setContentDispositionFormData("attachment", "상담정보.xlsx");
-
-            return new ResponseEntity<>(excelFile, headers, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
     /**
      * 사후해피콜 페이지

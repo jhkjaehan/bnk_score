@@ -391,42 +391,6 @@ function initializeCharts() {
         }
     });
 
-    // 스크립트 Score 차트
-    /*const scoreChart = new Chart(document.getElementById('scoreChart'), {
-        type: 'line',
-        data: {
-            labels: ['전체', '소매', '오토_신차', '오토_중고차', '오토_렌터카', '오토_리스'],
-            datasets: [{
-                label: '평균 스크립트 Score',
-                data: [85, 87, 83, 86, 84, 85],
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });*/
-
-    // 문제소지 콜 차트
-    /*const issueChart = new Chart(document.getElementById('issueChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['정상', '수수료/이면약정', '계약외지원약속'],
-            datasets: [{
-                data: [95, 3, 2],
-                backgroundColor: [
-                    'rgba(34, 197, 94, 0.5)',
-                    'rgba(239, 68, 68, 0.5)',
-                    'rgba(234, 179, 8, 0.5)'
-                ]
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });*/
-
     const problemNameList = [];
     const problemCntList = [];
 
@@ -634,6 +598,53 @@ function sumProblemData(data,callData) {
     return result;
 }
 
+// 목록 다운로드 버튼 클릭 이벤트 핸들러
+function downloadList() {
+    // 현재 검색 조건 가져오기
+    const searchForm = $("#searchForm").serializeArray();
+
+    const data = searchForm;
+    data.push({name: 'taskId', value: JSON.stringify(['TA0004','TA0005','TA0006','TA0007','TA0008'])});
+    data.push({name: 'currentPage', value: 1});
+    data.push({name: 'sortOrder', value: JSON.stringify(sortOrder)});
+    let headerNames = [];
+    let headerKeys = [];
+    $("#mstrHappyTable tr th").each(function() {
+        headerNames.push($(this).text().trim());
+        headerKeys.push($(this).data("sort"));
+    });
+    data.push({name:"headerNames", value: headerNames});
+    data.push({name:"headerKeys", value: headerKeys});
+
+    console.log(data);
+
+    // AJAX 요청
+    $.ajax({
+        url: '/common/downloadList.do',
+        method: 'POST',
+        data: data,
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(blob) {
+            // 파일 다운로드
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `상담목록_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        },
+        error: function(xhr, status, error) {
+            console.error('다운로드 실패:', error);
+            alert('목록 다운로드 중 오류가 발생했습니다.');
+        }
+    });
+}
+
+
 function bindEvent() {
 
     commonBindEvent();
@@ -687,4 +698,6 @@ function bindEvent() {
         e.preventDefault();
         loadChartData();
     });
+
+    $('.download-list-btn').on('click', downloadList);
 }

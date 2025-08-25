@@ -121,30 +121,6 @@
             고객과 대화내용
         </h2>
         <div id="conversationBox" class="space-y-4">
-            <!-- 상담사 대화 -->
-            <div class="flex items-start space-x-3">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                        <span class="text-white text-sm font-medium">상담</span>
-                    </div>
-                </div>
-                <div class="flex-1 bg-blue-50 rounded-lg p-4">
-                    <p class="text-sm text-gray-900">안녕하세요. ○○은행 상담사 홍길동입니다.</p>
-                    <span class="text-xs text-gray-500 mt-1">10:00:15</span>
-                </div>
-            </div>
-            <!-- 고객 대화 -->
-            <div class="flex items-start space-x-3 justify-end">
-                <div class="flex-1 bg-gray-100 rounded-lg p-4">
-                    <p class="text-sm text-gray-900">네, 안녕하세요.</p>
-                    <span class="text-xs text-gray-500 mt-1">10:00:20</span>
-                </div>
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
-                        <span class="text-white text-sm font-medium">고객</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
