@@ -148,8 +148,14 @@
           <div class="flex items-center space-x-4">
             <h2 class="text-lg font-semibold text-gray-800">검색 결과</h2>
             <span class="totalCount text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                    총 <span class="font-bold"></span>건
-                        </span>
+                총 <span class="font-bold"></span>건
+            </span>
+              <span class="customerCount text-sm text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">
+                상담 고객 <span class="font-bold count">0</span>명
+              </span>
+              <span class="extCustomerCount text-sm text-purple-700 bg-purple-50 px-2 py-1 rounded-full">
+                만기 고객 <span class="font-bold count">0</span>명
+              </span>
           </div>
           <div class="flex space-x-2"> <!-- 버튼 그룹 추가 -->
             <button type="button" id="resetSortBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -158,7 +164,7 @@
               </svg>
               정렬 초기화
             </button>
-            <button type="button" class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+            <button type="button" class="download-list-btn inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
               <svg class="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
               </svg>
@@ -184,7 +190,7 @@
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">만기일자</th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item01">만기일자</th>
             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorCd">
               상담사번호
               <span class="sort-icon" data-direction="none"></span>
@@ -200,10 +206,10 @@
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">결정구분</th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">고객의향</th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">리콜약속</th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">약속일시</th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item02">결정구분</th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item03">고객의향</th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item04">리콜약속</th>
+            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item05">약속일시</th>
             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="scoreValue">
               연장가능성<br>Score
               <span class="sort-icon" data-direction="none"></span>

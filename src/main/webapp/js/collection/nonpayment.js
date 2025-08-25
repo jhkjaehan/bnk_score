@@ -143,6 +143,52 @@ function updatePagination(currentPage, totalPages) {
     }
 }
 
+// 목록 다운로드 버튼 클릭 이벤트 핸들러
+function downloadList() {
+    // 현재 검색 조건 가져오기
+    const searchForm = $("#searchForm").serializeArray();
+
+    const data = searchForm;
+    data.push({name: 'taskId', value: "TA0001"});
+    data.push({name: 'currentPage', value: 1});
+    data.push({name: 'sortOrder', value: JSON.stringify(sortOrder)});
+    let headerNames = [];
+    let headerKeys = [];
+    $("#mstrNonpayTable tr th").each(function() {
+        headerNames.push($(this).text().trim());
+        headerKeys.push($(this).data("sort"));
+    });
+    data.push({name:"headerNames", value: headerNames});
+    data.push({name:"headerKeys", value: headerKeys});
+
+    console.log(data);
+
+    // AJAX 요청
+    $.ajax({
+        url: '/common/downloadList.do',
+        method: 'POST',
+        data: data,
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(blob) {
+            // 파일 다운로드
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `상담목록_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        },
+        error: function(xhr, status, error) {
+            console.error('다운로드 실패:', error);
+            alert('목록 다운로드 중 오류가 발생했습니다.');
+        }
+    });
+}
+
 /**
  * ===========================================================
  *  차트 및 시트관련 함수
@@ -369,51 +415,7 @@ function initializeCharts() {
     });
 }
 
-// 목록 다운로드 버튼 클릭 이벤트 핸들러
-function downloadList() {
-    // 현재 검색 조건 가져오기
-    const searchForm = $("#searchForm").serializeArray();
 
-    const data = searchForm;
-    data.push({name: 'taskId', value: "TA0001"});
-    data.push({name: 'currentPage', value: 1});
-    data.push({name: 'sortOrder', value: JSON.stringify(sortOrder)});
-    let headerNames = [];
-    let headerKeys = [];
-    $("#mstrNonpayTable tr th").each(function() {
-        headerNames.push($(this).text().trim());
-        headerKeys.push($(this).data("sort"));
-    });
-    data.push({name:"headerNames", value: headerNames});
-    data.push({name:"headerKeys", value: headerKeys});
-
-    console.log(data);
-
-    // AJAX 요청
-    $.ajax({
-        url: '/common/downloadList.do',
-        method: 'POST',
-        data: data,
-        xhrFields: {
-            responseType: 'blob'
-        },
-        success: function(blob) {
-            // 파일 다운로드
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `상담목록_${new Date().toISOString().slice(0, 10)}.xlsx`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
-        },
-        error: function(xhr, status, error) {
-            console.error('다운로드 실패:', error);
-            alert('목록 다운로드 중 오류가 발생했습니다.');
-        }
-    });
-}
 
 
 // 엑셀 다운로드 함수

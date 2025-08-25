@@ -59,7 +59,11 @@ public class ExcelService {
             for (Map<String, Object> item : list) {
                 Row row = sheet.createRow(rowNum++);
                 for (int i = 0; i < headerKeys.length; i++) {
-                    row.createCell(i).setCellValue(String.valueOf(item.get(headerKeys[i])));
+                    if(String.valueOf(item.get(headerKeys[i])).equals("null")) {
+                        row.createCell(i).setCellValue("");
+                    } else {
+                        row.createCell(i).setCellValue(String.valueOf(item.get(headerKeys[i])));
+                    }
                 }
 //                row.createCell(0).setCellValue(String.valueOf(item.get("callDt")));
 //                row.createCell(1).setCellValue(String.valueOf(item.get("custNum")));

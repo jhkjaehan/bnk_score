@@ -12,7 +12,7 @@
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- 환영 메시지 섹션 -->
     <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">VODABI 대화 스코어링 솔루션</h1>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">대화 분석 스코어링 시스템</h1>
         <p class="text-xl text-gray-600">효율적인 상담 품질 관리를 위한 통합 솔루션</p>
     </div>
 
@@ -44,12 +44,12 @@
                         </a>
                     </li>
                     <li>
-                        <a href="${pageContext.request.contextPath}/collection/debtCollectionPage.do"
+                        <a href="javascript:void(0);"
                            class="flex items-center text-gray-700 hover:text-blue-600">
                             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"/>
                             </svg>
-                            채권추심
+                            채권추심(향후 오픈)
                         </a>
                     </li>
                 </ul>
@@ -69,16 +69,16 @@
                             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"/>
                             </svg>
-                            우수추가대출
+                            우수고객추가대출
                         </a>
                     </li>
                     <li>
-                        <a href="${pageContext.request.contextPath}/retail/loanAgreementPage.do"
+                        <a href="javascript:void(0);"
                            class="flex items-center text-gray-700 hover:text-green-600">
                             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"/>
                             </svg>
-                            대출취급약정안내
+                            대출취급약정안내(향후 오픈)
                         </a>
                     </li>
                 </ul>
@@ -102,12 +102,12 @@
                         </a>
                     </li>
                     <li>
-                        <a href="${pageContext.request.contextPath}/auto/preHappyCallPage.do"
+                        <a href="javascript:void(0);"
                            class="flex items-center text-gray-700 hover:text-purple-600">
                             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"/>
                             </svg>
-                            사전해피콜
+                            사전해피콜(향후 오픈)
                         </a>
                     </li>
                 </ul>
@@ -116,7 +116,7 @@
     </div>
 
     <!-- 대시보드 섹션 -->
-    <div class="bg-white rounded-lg shadow-lg p-6">
+    <%--<div class="bg-white rounded-lg shadow-lg p-6">
         <h2 class="text-2xl font-semibold text-gray-900 mb-6">시스템 현황</h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- 통계 카드들 -->
@@ -137,7 +137,7 @@
                 <p class="text-3xl font-bold text-red-600">3</p>
             </div>
         </div>
-    </div>
+    </div>--%>
 </main>
 </body>
 </html>

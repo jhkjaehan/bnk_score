@@ -426,5 +426,46 @@
         <include refid="nonpayListWhere"/>
     </select>
 
+    <!-- 상담 고객 수 조회 -->
+    <select id="selectMstrCustomerListCount" parameterType="hashmap" resultType="int">
+        SELECT COUNT(distinct MC.CUST_NUM)
+        FROM MSTR_CALL MC
+        LEFT JOIN MSTR_COUNSELOR MCS
+        ON MC.COUNSELOR_CD = MCS.COUNSELOR_CD
+        LEFT JOIN V_MSTR_CALL_TASK VMC
+        ON MC.CALL_ID = VMC.CALL_ID
+        LEFT JOIN (
+        SELECT CALL_ID, TASK_ID, SCORE_ID, SCORE_VALUE FROM MSTR_ANALYSIS_SCORE
+        WHERE SCORE_ID IN
+        (
+        SELECT MIN(SCORE_ID) FROM MSTR_EVAL_SCORE_CONTENT
+        GROUP BY TASK_ID
+        )
+        ) MAS
+        ON MC.CALL_ID = MAS.CALL_ID
+        <include refid="searchListJoin"/>
+        <include refid="nonpayListWhere"/>
+    </select>
+
+    <!-- 만기 고객 수 조회 -->
+    <select id="selectMstrExtCustomerListCount" parameterType="hashmap" resultType="int">
+        SELECT COUNT(MARI1.result_value)
+        FROM MSTR_CALL MC
+        LEFT JOIN MSTR_COUNSELOR MCS
+        ON MC.COUNSELOR_CD = MCS.COUNSELOR_CD
+        LEFT JOIN V_MSTR_CALL_TASK VMC
+        ON MC.CALL_ID = VMC.CALL_ID
+        LEFT JOIN (
+        SELECT CALL_ID, TASK_ID, SCORE_ID, SCORE_VALUE FROM MSTR_ANALYSIS_SCORE
+        WHERE SCORE_ID IN
+        (
+        SELECT MIN(SCORE_ID) FROM MSTR_EVAL_SCORE_CONTENT
+        GROUP BY TASK_ID
+        )
+        ) MAS
+        ON MC.CALL_ID = MAS.CALL_ID
+        <include refid="searchListJoin"/>
+        <include refid="nonpayListWhere"/>
+    </select>
 
 </mapper>

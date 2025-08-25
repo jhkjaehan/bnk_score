@@ -77,10 +77,18 @@ function loadMstrSearchList(data) {
     const tdTemplate = "<td class=\"px-4 py-2 whitespace-nowrap\"></td>"
     const trTemplate = "<tr onclick=\"\" class=\"hover:bg-gray-50 text-xs\"></tr>"
     const totalCount = data.totalCount;
+    const customerCount = data.customerCount;
+    const extCustomerCount = data.extCustomerCount;
     var data = data.list;
 
     // 총 건수
     $("#listTab").find(".totalCount span").text(totalCount.toLocaleString());
+
+    // 상담 고객 수
+    $("#listTab").find(".customerCount span").text(customerCount.toLocaleString());
+
+    // 만기 고객 수
+    $("#listTab").find(".extCustomerCount span").text(extCustomerCount.toLocaleString());
 
     // 목록 초기화
     $('#mstrListTable tbody').empty();
@@ -175,6 +183,51 @@ function openDetailPage(callId,taskId) {
     );
 }
 
+// 목록 다운로드 버튼 클릭 이벤트 핸들러
+function downloadList() {
+    // 현재 검색 조건 가져오기
+    const searchForm = $("#searchForm").serializeArray();
+
+    const data = searchForm;
+    data.push({name: 'taskId', value: "TA0003"});
+    data.push({name: 'currentPage', value: 1});
+    data.push({name: 'sortOrder', value: JSON.stringify(sortOrder)});
+    let headerNames = [];
+    let headerKeys = [];
+    $("#mstrListTable tr th").each(function() {
+        headerNames.push($(this).text().trim());
+        headerKeys.push($(this).data("sort"));
+    });
+    data.push({name:"headerNames", value: headerNames});
+    data.push({name:"headerKeys", value: headerKeys});
+
+    console.log(data);
+
+    // AJAX 요청
+    $.ajax({
+        url: '/common/downloadList.do',
+        method: 'POST',
+        data: data,
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(blob) {
+            // 파일 다운로드
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `상담목록_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        },
+        error: function(xhr, status, error) {
+            console.error('다운로드 실패:', error);
+            alert('목록 다운로드 중 오류가 발생했습니다.');
+        }
+    });
+}
 
 /**
  * ===========================================================
@@ -285,8 +338,6 @@ function initializeCharts() {
         return data.itemId == "I0000";
     });
 
-    console.log("callsChartData : ");
-    console.log(callsChartData);
 
     const callMaxDt = Math.max(ccData[0].callCnt, ccData[0].custCnt, ccData[0].expCustCnt);
 
@@ -673,4 +724,6 @@ function bindEvent() {
         loadChartData(); // 새로운 차트 생성
 
     });
+
+    $('.download-list-btn').on('click', downloadList);
 }

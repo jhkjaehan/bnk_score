@@ -82,10 +82,14 @@ function loadMstrSearchList(data) {
     const tdTemplate = "<td class=\"px-4 py-2 whitespace-nowrap\"></td>"
     const trTemplate = "<tr onclick=\"\" class=\"hover:bg-gray-50 text-xs\"></tr>"
     const totalCount = data.totalCount;
+    const customerCount = data.customerCount;
     var data = data.list;
 
     // 총 건수
     $("#listTab").find(".totalCount span").text(totalCount.toLocaleString());
+
+    // 총 건수
+    $("#listTab").find(".customerCount span").text(customerCount.toLocaleString());
 
     // 목록 초기화
     $('#mstrListTable tbody').empty();
@@ -165,6 +169,53 @@ function updatePagination(currentPage, totalPages) {
             </a>
         `);
     }
+}
+
+
+// 목록 다운로드 버튼 클릭 이벤트 핸들러
+function downloadList() {
+    // 현재 검색 조건 가져오기
+    const searchForm = $("#searchForm").serializeArray();
+
+    const data = searchForm;
+    data.push({name: 'taskId', value: "TA0002"});
+    data.push({name: 'currentPage', value: 1});
+    data.push({name: 'sortOrder', value: JSON.stringify(sortOrder)});
+    let headerNames = [];
+    let headerKeys = [];
+    $("#mstrListTable tr th").each(function() {
+        headerNames.push($(this).text().trim());
+        headerKeys.push($(this).data("sort"));
+    });
+    data.push({name:"headerNames", value: headerNames});
+    data.push({name:"headerKeys", value: headerKeys});
+
+    console.log(data);
+
+    // AJAX 요청
+    $.ajax({
+        url: '/common/downloadList.do',
+        method: 'POST',
+        data: data,
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(blob) {
+            // 파일 다운로드
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `상담목록_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        },
+        error: function(xhr, status, error) {
+            console.error('다운로드 실패:', error);
+            alert('목록 다운로드 중 오류가 발생했습니다.');
+        }
+    });
 }
 
 /**
@@ -357,50 +408,6 @@ function initializeCharts() {
             }
         }
     });
-/*
-    const problemNameList = [];
-    const problemCntList = [];
-
-    problemChartData.forEach(row => {
-        problemNameList.push(row.name);
-        problemCntList.push(row.ratio);
-    })
-    //const problemMaxDt = Math.max(...problemCntList);
-
-    // 문제소지 콜수 비중 차트
-    issueChart = new Chart($('#issueChart'), {
-        type: 'bar',
-        data: {
-            labels: problemNameList,
-            datasets: [{
-                data: problemCntList,
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(255, 206, 86, 0.7)',
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(153, 102, 255, 0.7)'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: '비중(%)'
-                    }
-                }
-            }
-        }
-    });*/
 }
 
 
@@ -413,22 +420,16 @@ function initSheetData(data) {
     //callSheetData = callSheetData.filter(row => { return row.taskId === 'TA0002'; });
 
     sampleData = [];
-    console.log("sheetData1");
-    console.log(sheetData);
 
     sheetData.forEach(row => {
 
         var filteredData = sheetData.filter(d => {
             return d.itemName == row.itemName;
         });
-        console.log("filteredData");
-        console.log(filteredData);
-        console.log("row");
-        console.log(row);
+
         sampleData.push({category:row.itemName, item:row.contentName,callCnt:row.callCnt,callRto:row.callRto,custCnt:row.custCnt,custRto:row.custRto,rowspan: filteredData.length})
     })
-    console.log("sheetData2");
-    console.log(sheetData);
+
 /*
     callSheetData.forEach(row => {
         sampleData.push({category:"전체", item:row.name,measure:row.cnt,ratio:row.ratio,rowspan: callSheetData.length});
@@ -601,4 +602,6 @@ function bindEvent() {
         loadChartData(); // 새로운 차트 생성
 
     });
+
+    $('.download-list-btn').on('click', downloadList);
 }

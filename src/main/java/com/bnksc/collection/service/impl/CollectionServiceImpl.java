@@ -32,6 +32,7 @@ public class CollectionServiceImpl  implements CollectionService {
         int currentPage = Integer.parseInt(String.valueOf(params.getOrDefault("currentPage", "1")));
         int startRow = (currentPage - 1) * pageSize + 1;
         int endRow = currentPage * pageSize;
+        String[] taskId = (String[])params.get("taskId");
 
         params.put("startRow", startRow);
         params.put("endRow", endRow);
@@ -39,6 +40,8 @@ public class CollectionServiceImpl  implements CollectionService {
         // 데이터 조회
         List<Map<String, Object>> list = sqlSession.selectList("Collection.selectMstrNonpayList", params);
         int totalCount = sqlSession.selectOne("Collection.selectMstrNonpayListCount", params);
+        int customerCount = sqlSession.selectOne("Collection.selectMstrCustomerListCount", params);
+
 
         // 결과 맵 구성
         Map<String, Object> result = new HashMap<>();
@@ -47,6 +50,11 @@ public class CollectionServiceImpl  implements CollectionService {
         result.put("currentPage", currentPage);
         result.put("pageSize", pageSize);
         result.put("totalPages", (int) Math.ceil((double) totalCount / pageSize));
+        result.put("customerCount", customerCount);
+        if(taskId[0].equals("TA0003")) {
+            int extCustomerCount = sqlSession.selectOne("Collection.selectMstrExtCustomerListCount", params);
+            result.put("extCustomerCount", extCustomerCount);
+        }
 
         return result;
     }
