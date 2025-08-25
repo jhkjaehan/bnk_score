@@ -92,8 +92,8 @@ function loadMstrNonpayList(data) {
         $trTemplate.append($(tdTemplate).addClass("cursor-pointer text-blue-600 hover:text-blue-800").on("click",function(){ openDetailPage(row.callId) }).text(row.callId));
         $trTemplate.append($(tdTemplate).text(row.scoreValue));
         $trTemplate.append($(tdTemplate).text(row.item05)); //오안내
-        $trTemplate.append($(tdTemplate).text(row.item06)); //금지문구
-        $trTemplate.append($(tdTemplate).text(row.item07)); //불법추심
+        $trTemplate.append($(tdTemplate).text(row.item07)); //금지문구
+        $trTemplate.append($(tdTemplate).text(row.item06)); //불법추심
         $trTemplate.append($(tdTemplate).text(row.item08)); //납부의사
 
         mstrNonpayTable.find("tbody").append($trTemplate);

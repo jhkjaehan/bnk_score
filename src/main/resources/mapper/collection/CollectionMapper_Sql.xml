@@ -27,10 +27,10 @@
                 AND IFNULL(MARI5.RESULT_VALUE,'N') = #{wrongGuide}
             </if>
             <if test="banned != null and banned != ''">
-                AND IFNULL(MARI6.RESULT_VALUE,'N') = #{banned}
+                AND IFNULL(MARI7.RESULT_VALUE,'N') = #{banned}
             </if>
             <if test="illegal != null and illegal != ''">
-                AND IFNULL(MARI7.RESULT_VALUE,'N') = #{illegal}
+                AND IFNULL(MARI6.RESULT_VALUE,'N') = #{illegal}
             </if>
             <if test="paymentWill != null and paymentWill != ''">
                 AND IFNULL(MARI8.RESULT_VALUE,'N') = #{paymentWill}

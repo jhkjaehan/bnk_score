@@ -78,7 +78,7 @@
             <if test="callId != null and callId != ''">
                 AND RES.CALL_ID = #{callId}
             </if>
-            AND RES.RESULT_VALUE IN ('Y','N')
+            /*AND RES.RESULT_VALUE IN ('Y','N')*/
         </where>
         ),
         /* TYPE 단위 COUNT*/

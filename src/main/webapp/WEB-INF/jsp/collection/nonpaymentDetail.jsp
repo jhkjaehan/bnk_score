@@ -80,15 +80,6 @@
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                <tr class="bg-blue-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">배점</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">20</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">5</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">5</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">5</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">5</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">5</td>
-                </tr>
                 </tbody>
             </table>
         </div>
