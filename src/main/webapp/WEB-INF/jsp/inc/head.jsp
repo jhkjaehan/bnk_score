@@ -25,3 +25,5 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/common/common.js"></script>
 <%--
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">--%>
+
+<title>대화 분석 스코어링 시스템</title>

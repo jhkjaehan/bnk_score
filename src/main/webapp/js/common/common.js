@@ -91,6 +91,11 @@ function initCounselorList(data) {
 
 }
 
+// 숫자 포맷팅 함수
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 function commonBindEvent() {
     // 탭 전환 로직
     $('.tab-link').on('click', function(e) {

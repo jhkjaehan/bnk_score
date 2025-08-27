@@ -124,7 +124,27 @@
         WHERE A.task_id = 'TA0003'
         AND A.ITEM_ID IN ('I0000','I0017','I0018', 'I0021')
         AND A.CONTENT_ID NOT IN ('C0053')
-        ORDER BY A.TASK_ID, A.ITEM_ID, A.CONTENT_ID
+        UNION
+        SELECT 'TA0003' AS "taskId"
+        , '' AS "itemId"
+        , 'Score' AS "itemName"
+        , '' AS "contentId"
+        , '연장가능성(평균)' AS "contentName"
+        , AVG(A.SCORE_VALUE) AS "callCnt"
+        , '' AS "callRto"
+        , '' AS "custCnt"
+        , '' AS "custRto"
+        , '' AS "expCustCnt"
+        , '' AS "expCustRto"
+        FROM MSTR_ANALYSIS_SCORE A
+        LEFT JOIN MSTR_CALL B
+        ON A.CALL_ID = B.CALL_ID
+        LEFT JOIN mstr_analysis_result C
+        ON B.CALL_ID = C.CALL_ID
+        AND C.CONTENT_ID IN ('C0118')
+        WHERE A.TASK_ID = 'TA0003'
+        AND A.SCORE_ID = 'S0011'
+        <include refid="whereSelectCall"/>
     </select>
 
 </mapper>

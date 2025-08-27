@@ -420,18 +420,62 @@ function initializeCharts() {
 
 // 엑셀 다운로드 함수
 function downloadStats() {
+
+    let headerNames = [];
+    let headerKeys = [];
+    $("#mstrStatsTable tr th").each(function() {
+        headerNames.push($(this).text().trim());
+        headerKeys.push($(this).data("header"));
+    });
+
+    // 현재 상세 통계 그리드의 데이터 수집
+    const statsData = sampleData.map(row => ({
+        category: row.category,
+        item: row.item,
+        measure: row.measure,
+        ratio: row.ratio
+    }));
+
+    // 검색 조건도 포함
+    const data = {
+        statsData: statsData,
+        searchParams: {
+            startDate: $("#statsSearchForm input[name=startDate]").val(),
+            endDate: $("#statsSearchForm input[name=endDate]").val(),
+            counselor: $("#statsSearchForm select[name=counselor]").val(),
+            product: $("#statsSearchForm select[name=product]").val()
+        },
+        headerNames: headerNames,
+        headerKeys: headerKeys
+    };
+
+    // 서버로 데이터 전송
     $.ajax({
-        url: '/collection/downloadStats.do',
+        url: '/common/downloadStats.do',
         method: 'POST',
-        data: $('#statsSearchForm').serialize(),
-        success: function(response) {
-            // 엑셀 다운로드 처리
-            console.log('다운로드 성공');
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(blob) {
+            // 파일 다운로드
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `상담통계_${new Date().toISOString().slice(0,10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
         },
         error: function(xhr, status, error) {
-            alert('엑셀 다운로드 중 오류가 발생했습니다.');
+            console.error('다운로드 실패:', error);
+            alert('통계 다운로드 중 오류가 발생했습니다.');
         }
     });
+
+
 }
 
 

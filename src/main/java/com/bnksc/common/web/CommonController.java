@@ -257,4 +257,27 @@ public class CommonController {
         }
 
     }
+    
+    
+    @RequestMapping(value="/common/downloadStats.do", method=RequestMethod.POST)
+    public ResponseEntity<byte[]> downloadStats(@RequestBody Map<String, Object> data) {
+        try {
+            // Excel 파일 생성
+            byte[] excelFile = excelService.createStatsExcel(data);
+            
+            // 현재 날짜 구하기
+            String fileName = "통계현황_" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx";
+            String encodedFileName = URLEncoder.encode(fileName, "UTF-8");
+            
+            // 응답 헤더 설정
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", encodedFileName);
+            
+            return new ResponseEntity<>(excelFile, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -32,6 +32,22 @@
             <if test="product != null and product != ''">
                 AND v.TASK_ID = #{product}
             </if>
+            <if test="csAgmt != null and csAgmt != ''">
+                AND c.CALL_ID IN (
+                    SELECT CALL_ID FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0034'
+                    AND CONTENT_ID = 'C0097'
+                    AND RESULT_VALUE = #{csAgmt}
+                )
+            </if>
+            <if test="ncSupport != null and ncSupport != ''">
+                AND c.CALL_ID IN (
+                    SELECT CALL_ID FROM MSTR_ANALYSIS_RESULT
+                    WHERE ITEM_ID = 'I0043'
+                    AND CONTENT_ID = 'C0117'
+                    AND RESULT_VALUE = #{ncSupport}
+                )
+            </if>
         </where>
         group by v.TASK_ID)
         select call_stats.TASK_ID AS taskId
@@ -88,6 +104,22 @@
             <if test="product != null and product != ''">
                 AND A.TASK_ID = #{product}
             </if>
+            <if test="csAgmt != null and csAgmt != ''">
+                AND C.CALL_ID IN (
+                SELECT CALL_ID FROM MSTR_ANALYSIS_RESULT
+                WHERE ITEM_ID = 'I0034'
+                AND CONTENT_ID = 'C0097'
+                AND RESULT_VALUE = #{csAgmt}
+                )
+            </if>
+            <if test="ncSupport != null and ncSupport != ''">
+                AND C.CALL_ID IN (
+                SELECT CALL_ID FROM MSTR_ANALYSIS_RESULT
+                WHERE ITEM_ID = 'I0043'
+                AND CONTENT_ID = 'C0117'
+                AND RESULT_VALUE = #{ncSupport}
+                )
+            </if>
         </where>
         GROUP BY B.NAME
     </select>
@@ -117,6 +149,22 @@
                 </if>
                 <if test="counselor != null and counselor != ''">
                     AND MC.COUNSELOR_CD = #{counselor}
+                </if>
+                <if test="csAgmt != null and csAgmt != ''">
+                    AND MC.CALL_ID IN (
+                        SELECT CALL_ID FROM MSTR_ANALYSIS_RESULT
+                        WHERE ITEM_ID = 'I0034'
+                        AND CONTENT_ID = 'C0097'
+                        AND RESULT_VALUE = #{csAgmt}
+                    )
+                </if>
+                <if test="ncSupport != null and ncSupport != ''">
+                    AND MC.CALL_ID IN (
+                        SELECT CALL_ID FROM MSTR_ANALYSIS_RESULT
+                        WHERE ITEM_ID = 'I0043'
+                        AND CONTENT_ID = 'C0117'
+                        AND RESULT_VALUE = #{ncSupport}
+                    )
                 </if>
             </where>
             GROUP BY MAR.task_id,

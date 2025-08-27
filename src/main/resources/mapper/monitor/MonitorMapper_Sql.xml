@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Monitor">
+    <sql id="whereSelectBatchLogList">
+        <where>
+            <if test="status != '' and status != null">
+                AND UPPER(STATUS) = #{status}
+            </if>
+            <if test="startDate != '' and startDate != null">
+                AND RAISE_DT <![CDATA[ >= ]]> STR_TO_DATE(#{startDate},'%Y-%m-%d')
+            </if>
+            <if test="endDate != '' and endDate != null">
+                AND RAISE_DT <![CDATA[ <= ]]> STR_TO_DATE(#{endDate},'%Y-%m-%d')
+            </if>
+        </where>
+    </sql>
+
+
+    <select id="selectBatchLogList" parameterType="hashmap" resultType="hashmap">
+    <!-- Monitor.selectBatchLogList -->
+        SELECT * FROM (
+            SELECT
+                @ROWNUM := @ROWNUM + 1 AS RNUM,
+                A.*
+            FROM (
+                SELECT
+                    DATE_FORMAT(RAISE_DT,'%Y.%m.%d %H:%i:%s') AS "raiseDt"
+                    , CALL_ID AS "callId"
+                    , UPPER(STATUS) AS "status"
+                    , IFNULL(ERR_MSG,'') AS "errMsg"
+                FROM MSTR_BATCH_LOGS
+                <include refid="whereSelectBatchLogList"/>
+                ORDER BY RAISE_DT DESC
+            ) A, (SELECT @ROWNUM := 0) R
+        ) B
+        <where>
+            <if test="startRow != null and endRow != null">
+                RNUM BETWEEN #{startRow} AND #{endRow}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="selectBatchLogCount" parameterType="hashmap" resultType="int">
+        SELECT COUNT(*)
+        FROM MSTR_BATCH_LOGS
+        <include refid="whereSelectBatchLogList"/>
+    </select>
+
+</mapper>

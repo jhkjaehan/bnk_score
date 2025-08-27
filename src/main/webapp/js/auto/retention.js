@@ -442,50 +442,6 @@ function initializeCharts() {
             }
         }
     });
-    /*
-        const problemNameList = [];
-        const problemCntList = [];
-
-        problemChartData.forEach(row => {
-            problemNameList.push(row.name);
-            problemCntList.push(row.ratio);
-        })
-        //const problemMaxDt = Math.max(...problemCntList);
-
-        // 문제소지 콜수 비중 차트
-        issueChart = new Chart($('#issueChart'), {
-            type: 'bar',
-            data: {
-                labels: problemNameList,
-                datasets: [{
-                    data: problemCntList,
-                    backgroundColor: [
-                        'rgba(75, 192, 192, 0.7)',
-                        'rgba(255, 206, 86, 0.7)',
-                        'rgba(255, 99, 132, 0.7)',
-                        'rgba(153, 102, 255, 0.7)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        title: {
-                            display: true,
-                            text: '비중(%)'
-                        }
-                    }
-                }
-            }
-        });*/
 }
 
 
@@ -498,18 +454,12 @@ function initSheetData(data) {
     //callSheetData = callSheetData.filter(row => { return row.taskId === 'TA0002'; });
 
     sampleData = [];
-    console.log("sheetData1");
-    console.log(sheetData);
 
     sheetData.forEach(row => {
 
         var filteredData = sheetData.filter(d => {
             return d.itemName == row.itemName;
         });
-        console.log("filteredData");
-        console.log(filteredData);
-        console.log("row");
-        console.log(row);
         sampleData.push({
             category:row.itemName
             , item:row.contentName
@@ -521,20 +471,6 @@ function initSheetData(data) {
             ,expCustRto:row.expCustRto
             ,rowspan: filteredData.length})
     })
-    console.log("sheetData2");
-    console.log(sheetData);
-    /*
-        callSheetData.forEach(row => {
-            sampleData.push({category:"전체", item:row.name,measure:row.cnt,ratio:row.ratio,rowspan: callSheetData.length});
-        })
-
-        scoreSheetData.forEach(row => {
-            sampleData.push({category:"평균 스크립트 Score", item:row.name,measure:row.avgScore,ratio:"",rowspan: scoreSheetData.length});
-        })
-
-        problemSheetData.forEach(row => {
-            sampleData.push({category:"문제소지 콜", item:row.name,measure:row.cnt,ratio:row.ratio,rowspan: problemSheetData.length});
-        })*/
 
     renderStatsDetailGrid(sampleData);
 }
@@ -589,14 +525,22 @@ function renderStatsDetailGrid(data) {
             </div>
         `);
 
-        // 측정치 열
-        const tdCallCnt = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
+        let tdCallCnt;
+        if(row.category === "Score") {
+            // 측정치 열
+            tdCallCnt = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
+            <div class="text-sm text-gray-900">${row.callCnt}</div>
+            `);
+        } else {
+            // 측정치 열
+            tdCallCnt = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
             <div class="text-sm text-gray-900">${numberWithCommas(row.callCnt)}</div>
-        `);
+            `);
+        }
 
         // 비중 열
         const tdCallRto = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
-            <div class="text-sm text-gray-900">${row.callRto ? row.callRto.toFixed(1) : 0}</div>
+            <div class="text-sm text-gray-900">${row.callRto ? parseFloat(row.callRto).toFixed(1) : 0}</div>
         `);
 
         // 측정치 열
@@ -606,7 +550,7 @@ function renderStatsDetailGrid(data) {
 
         // 비중 열
         const tdCustRto = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
-            <div class="text-sm text-gray-900">${row.custRto ? row.custRto.toFixed(1) : 0}</div>
+            <div class="text-sm text-gray-900">${row.custRto ? parseFloat(row.custRto).toFixed(1) : 0}</div>
         `);
 
         // 측정치 열
@@ -616,7 +560,7 @@ function renderStatsDetailGrid(data) {
 
         // 비중 열
         const tdExpCustRto = $('<td>').addClass('px-6 py-4 whitespace-nowrap text-right').html(`
-            <div class="text-sm text-gray-900">${row.expCustRto ? row.expCustRto.toFixed(1) : 0}</div>
+            <div class="text-sm text-gray-900">${row.expCustRto ? parseFloat(row.expCustRto).toFixed(1) : 0}</div>
         `);
 
         tr.append(tdCategory, tdItem, tdCallCnt, tdCallRto, tdCustCnt, tdCustRto, tdExpCustCnt, tdExpCustRto);
@@ -626,16 +570,62 @@ function renderStatsDetailGrid(data) {
 
 // 엑셀 다운로드 함수
 function downloadStats() {
+    let headerNames = [];
+    let headerKeys = [];
+    $("#mstrStatsTable tr th").each(function() {
+        headerNames.push($(this).text().trim());
+        headerKeys.push($(this).data("header"));
+    });
+
+    // 현재 상세 통계 그리드의 데이터 수집
+    const statsData = sampleData.map(row => ({
+        category: row.category,
+        item: row.item,
+        callCnt: row.callCnt,
+        callRto: row.callRto,
+        custCnt: row.custCnt,
+        custRto: row.custRto,
+        expCustCnt: row.expCustCnt,
+        expCustRto: row.expCustRto
+
+    }));
+
+    // 검색 조건도 포함
+    const data = {
+        statsData: statsData,
+        searchParams: {
+            startDate: $("#statsSearchForm input[name=startDate]").val(),
+            endDate: $("#statsSearchForm input[name=endDate]").val(),
+            counselor: $("#statsSearchForm select[name=counselor]").val(),
+            product: $("#statsSearchForm select[name=product]").val()
+        },
+        headerNames: headerNames,
+        headerKeys: headerKeys
+    };
+
+    // 서버로 데이터 전송
     $.ajax({
-        url: '/collection/downloadStats.do',
+        url: '/common/downloadStats.do',
         method: 'POST',
-        data: $('#statsSearchForm').serialize(),
-        success: function(response) {
-            // 엑셀 다운로드 처리
-            console.log('다운로드 성공');
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(blob) {
+            // 파일 다운로드
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `상담통계_${new Date().toISOString().slice(0,10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
         },
         error: function(xhr, status, error) {
-            alert('엑셀 다운로드 중 오류가 발생했습니다.');
+            console.error('다운로드 실패:', error);
+            alert('통계 다운로드 중 오류가 발생했습니다.');
         }
     });
 }
@@ -665,13 +655,6 @@ function resetSearchForm() {
     $('#statsSearchForm')[0].reset();
     destroyCharts();
     initializeCharts();
-}
-
-
-
-// 숫자 포맷팅 함수
-function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // AJAX 성공 시 데이터 렌더링

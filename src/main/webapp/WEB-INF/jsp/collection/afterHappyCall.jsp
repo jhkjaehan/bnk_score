@@ -50,6 +50,49 @@
           </div>
         </div>
 
+        <div class="search-option-group">
+          <div class="grid grid-cols-5 gap-4">
+            <!-- 수수료/이면약정 -->
+            <div>
+              <label class="section-title">수수료/이면약정</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="csAgmt" value="" class="radio-input" checked>
+                  <span class="radio-text">전체</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="csAgmt" value="Y" class="radio-input">
+                  <span class="radio-text">Y</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="csAgmt" value="N" class="radio-input">
+                  <span class="radio-text">N</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 계약외지원약속 -->
+            <div>
+              <label class="section-title">계약외지원약속</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="ncSupport" value="" class="radio-input" checked>
+                  <span class="radio-text">전체</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="ncSupport" value="Y" class="radio-input">
+                  <span class="radio-text">Y</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="ncSupport" value="N" class="radio-input">
+                  <span class="radio-text">N</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
         <!-- 검색 버튼 -->
         <div class="flex justify-end space-x-2">
           <button type="reset" class="px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50">
@@ -182,12 +225,54 @@
           </select>
         </div>
 
-        <!-- 상품 선택 -->
-        <div class="col-span-3">
-          <label class="block text-sm font-medium text-gray-700">상품</label>
-          <select name="product" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-            <option value="">전체</option>
-          </select>
+        <div class="col-span-3 grid grid-cols-4 gap-6">
+          <!-- 상품 선택 -->
+          <div class="col-span-2 grid grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">상품</label>
+              <select name="product" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <option value="">전체</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 수수료/이면약정 -->
+          <div>
+            <label class="section-title">수수료/이면약정</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="csAgmt" value="" class="radio-input" checked>
+                <span class="radio-text">전체</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="csAgmt" value="Y" class="radio-input">
+                <span class="radio-text">Y</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="csAgmt" value="N" class="radio-input">
+                <span class="radio-text">N</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 계약외지원약속 -->
+          <div>
+            <label class="section-title">계약외지원약속</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="ncSupport" value="" class="radio-input" checked>
+                <span class="radio-text">전체</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="ncSupport" value="Y" class="radio-input">
+                <span class="radio-text">Y</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="ncSupport" value="N" class="radio-input">
+                <span class="radio-text">N</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- 검색 버튼 -->
@@ -237,13 +322,13 @@
         </button>
       </div>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table id="mstrStatsTable" class="min-w-full divide-y divide-gray-200">
           <thead>
           <tr class="bg-gray-50">
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">구분</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">항목</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">측정치</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">비중(%)</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-header="category">구분</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-header="item">항목</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" data-header="measure">측정치</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" data-header="ratio">비중(%)</th>
           </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200" id="statsDetailGrid">

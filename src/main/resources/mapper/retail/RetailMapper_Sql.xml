@@ -78,7 +78,22 @@
         WHERE A.task_id = 'TA0002'
         AND A.ITEM_ID IN ('I0000','I0010','I0011', 'I0012')
         AND A.CONTENT_ID NOT IN ('C0036')
-        ORDER BY A.TASK_ID, A.ITEM_ID, A.CONTENT_ID
+        UNION
+        SELECT 'TA0002' AS "taskId"
+        , '' AS "itemId"
+        , 'Score' AS "itemName"
+        , '' AS "contentId"
+        , '진행가능성(평균)' AS "contentName"
+        , AVG(A.SCORE_VALUE) AS "callCnt"
+        , '' AS "callRto"
+        , '' AS "custCnt"
+        , '' AS "custRto"
+        FROM MSTR_ANALYSIS_SCORE A
+        LEFT JOIN MSTR_CALL B
+        ON A.CALL_ID = B.CALL_ID
+        WHERE A.TASK_ID = 'TA0002'
+        AND A.SCORE_ID = 'S0007'
+        <include refid="whereSelectCall"/>
     </select>
 
 </mapper>

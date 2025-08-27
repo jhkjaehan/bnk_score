@@ -35,6 +35,12 @@
             <if test="paymentWill != null and paymentWill != ''">
                 AND IFNULL(MARI8.RESULT_VALUE,'N') = #{paymentWill}
             </if>
+            <if test="csAgmt != null and csAgmt != ''">
+                AND IFNULL(MARI1.RESULT_VALUE,'N') = #{csAgmt}
+            </if>
+            <if test="ncSupport != null and ncSupport != ''">
+                AND IFNULL(MARI2.RESULT_VALUE,'N') = #{ncSupport}
+            </if>
             <if test="counselor != null and counselor != ''">
                 AND MC.COUNSELOR_CD = #{counselor}
             </if>

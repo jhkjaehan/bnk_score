@@ -65,16 +65,6 @@ public class ExcelService {
                         row.createCell(i).setCellValue(String.valueOf(item.get(headerKeys[i])));
                     }
                 }
-//                row.createCell(0).setCellValue(String.valueOf(item.get("callDt")));
-//                row.createCell(1).setCellValue(String.valueOf(item.get("custNum")));
-//                row.createCell(2).setCellValue(String.valueOf(item.get("counselorCd")));
-//                row.createCell(3).setCellValue(String.valueOf(item.get("counselorName")));
-//                row.createCell(4).setCellValue(String.valueOf(item.get("callId")));
-//                row.createCell(5).setCellValue(String.valueOf(item.get("scoreValue")));
-//                row.createCell(6).setCellValue(String.valueOf(item.get("item05")));
-//                row.createCell(7).setCellValue(String.valueOf(item.get("item06")));
-//                row.createCell(8).setCellValue(String.valueOf(item.get("item07")));
-//                row.createCell(9).setCellValue(String.valueOf(item.get("item08")));
             }
         }
 
@@ -100,11 +90,9 @@ public class ExcelService {
             createBasicInfoSheet(basicInfoSheet, (Map<String, String>) data.get("basicInfo"), headerStyle, dataStyle);
 
             // 2. 스크립트 Score 시트 생성
-//            Sheet scoreSheet = workbook.createSheet("스크립트 Score");
             createScoreSheet(basicInfoSheet, (ArrayList<Map<String,Object>>) data.get("scoreInfo"), headerStyle, scoreStyle);
 
             // 3. 평가내용 시트 생성
-//            Sheet evaluationSheet = workbook.createSheet("평가내용");
             createEvaluationSheet(basicInfoSheet, (List<Map<String, String>>) data.get("evaluationInfo"), headerStyle, dataStyle);
 
             // 모든 시트의 컬럼 너비 자동 조정
@@ -120,6 +108,75 @@ public class ExcelService {
         }
 
     }
+
+    public byte[] createStatsExcel(Map<String, Object> data) throws IOException {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("상담 통계");
+        
+        // 헤더 스타일 설정
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+        
+        // 데이터 스타일 설정
+        CellStyle dataStyle = workbook.createCellStyle();
+        dataStyle.setAlignment(HorizontalAlignment.CENTER);
+        
+        // 헤더 생성
+        Row headerRow = sheet.createRow(0);
+        // 헤러 명칭 정보
+        ArrayList<String> headers = new ArrayList();
+        if( data.get("headerNames") != null) {
+            headers = (ArrayList<String>)data.get("headerNames");
+        }
+        // 헤더 키 정보
+        ArrayList<String> headerKeys = new ArrayList();
+        if(data.get("headerKeys") != null) {
+            headerKeys = (ArrayList<String>)data.get("headerKeys");
+        }
+
+        // 헤더 입력
+        for (int i = 0; i < headers.size(); i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers.get(i));
+            cell.setCellStyle(headerStyle);
+        }
+        
+        // 데이터 입력
+        List<Map<String, Object>> statsList = (List<Map<String, Object>>) data.get("statsData");
+        int rowNum = 1;
+
+        for (Map<String, Object> stat : statsList) {
+            Row row = sheet.createRow(rowNum++);
+
+            for(int i = 0; i < headerKeys.size(); i++) {
+                Cell  cell = row.createCell(i);
+                cell.setCellStyle(dataStyle);
+                String value = String.valueOf(stat.get(headerKeys.get(i)));
+                cell.setCellValue(value);
+            }
+        }
+        
+        // 컬럼 너비 자동 조정
+        for (int i = 0; i < headers.size(); i++) {
+            sheet.autoSizeColumn(i);
+        }
+        
+        // 엑셀 파일을 바이트 배열로 변환
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        workbook.write(bos);
+        workbook.close();
+        
+        return bos.toByteArray();
+}
+
+
 
     private CellStyle createHeaderStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
