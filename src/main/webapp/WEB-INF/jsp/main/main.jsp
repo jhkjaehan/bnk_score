@@ -4,7 +4,6 @@
 <html lang="ko">
 <head>
     <jsp:include page="/WEB-INF/jsp/inc/head.jsp"/>
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
 <jsp:include page="/WEB-INF/jsp/inc/header.jsp"/>

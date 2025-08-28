@@ -20,7 +20,10 @@
 <script src="${pageContext.request.contextPath}/js/jquery.placeholder.js"></script>
 <script src="${pageContext.request.contextPath}/js/jquery/jquery.fileDownload.js"></script>
 <%--<script src="${pageContext.request.contextPath}/js/portal/lib/jquery.bx.js"></script>--%>
-<script src="https://cdn.tailwindcss.com"></script>
+<%--<script src="https://cdn.tailwindcss.com"></script>--%>
+<%-- 로컬 Tailwind CSS 추가 --%>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/tailwind/output.css" />
+
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/common/common.js"></script>
 <%--

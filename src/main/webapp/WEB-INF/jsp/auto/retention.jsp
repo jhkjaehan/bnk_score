@@ -27,11 +27,11 @@
         <div class="grid grid-cols-2 gap-4">
           <div class="flex items-center">
             <label class="w-24 font-medium">고객번호</label>
-            <input type="text" name="custNum" class="flex-1 border rounded px-2 py-1">
+            <input type="text" name="custNum" class="bg-white border-gray-300 flex-1 border rounded px-2 py-1">
           </div>
           <div class="flex items-center">
             <label class="w-24 font-medium">상담사</label>
-            <select name="counselor" class="flex-1 border rounded px-2 py-1">
+            <select name="counselor" class="bg-white border-gray-300 flex-1 border rounded px-2 py-1">
               <option value="">선택하세요</option>
             </select>
           </div>
@@ -41,15 +41,15 @@
         <div class="grid grid-cols-2 gap-4">
           <div class="flex items-center">
             <label class="w-24 font-medium">만기일자</label>
-            <input type="date" name="startDateMatur" class="border rounded px-2 py-1">
+            <input type="date" name="startDateMatur" class="bg-white border-gray-300 border rounded px-2 py-1">
             <span class="mx-2">~</span>
-            <input type="date" name="endDateMatur" class="border rounded px-2 py-1">
+            <input type="date" name="endDateMatur" class="bg-white border-gray-300 border rounded px-2 py-1">
           </div>
           <div class="flex items-center">
             <label class="w-24 font-medium">상담일자</label>
-            <input type="date" name="startDate" class="border rounded px-2 py-1">
+            <input type="date" name="startDate" class="bg-white border-gray-300 border rounded px-2 py-1">
             <span class="mx-2">~</span>
-            <input type="date" name="endDate" class="border rounded px-2 py-1">
+            <input type="date" name="endDate" class="bg-white border-gray-300 border rounded px-2 py-1">
           </div>
         </div>
 
@@ -253,17 +253,17 @@
         <div>
           <label class="block text-sm font-medium text-gray-700">만기일자</label>
           <div class="mt-1 flex space-x-4">
-            <input type="date" name="startDateMatur" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            <input type="date" name="startDateMatur" class="border shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
             <span class="self-center">~</span>
-            <input type="date" name="endDateMatur" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            <input type="date" name="endDateMatur" class="border shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
           </div>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">상담일자</label>
           <div class="mt-1 flex space-x-4">
-            <input type="date" name="startDate" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            <input type="date" name="startDate" class="border shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
             <span class="self-center">~</span>
-            <input type="date" name="endDate" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            <input type="date" name="endDate" class="border shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
           </div>
         </div>
         <div>
@@ -301,7 +301,10 @@
             </label>
           </div>
         </div>
-        <div class="col-span-3 flex justify-end">
+        <div class="col-span-3 flex justify-end space-x-2">
+          <button type="reset" class="px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            초기화
+          </button>
           <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
             조회
           </button>

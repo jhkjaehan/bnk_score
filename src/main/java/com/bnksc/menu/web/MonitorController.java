@@ -164,7 +164,7 @@ public class MonitorController {
 //            String pythonPath = "/usr/bin/python3"; // 시스템의 Python 경로
 //            String scriptPath = "/Users/kimjaehan/Desktop/workF/testFiles/exTest.py";
 
-            ProcessBuilder processBuilder = new ProcessBuilder(pythonPath, pythonFilePath, callId);
+            ProcessBuilder processBuilder = new ProcessBuilder(pythonPath, pythonFilePath,"--call_id", callId);
             processBuilder.redirectErrorStream(true); // 에러 스트림을 표준 출력으로 리다이렉트
 
             Process process = processBuilder.start();

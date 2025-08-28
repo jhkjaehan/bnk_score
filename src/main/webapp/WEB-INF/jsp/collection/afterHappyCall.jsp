@@ -27,7 +27,7 @@
           <!-- 상담사 선택 -->
           <div class="search-option-group">
             <label class="section-title">상담사</label>
-            <select name="counselor" class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            <select name="counselor" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
               <option value="">선택하세요</option>
             </select>
           </div>
@@ -36,15 +36,15 @@
           <div class="search-option-group">
             <label class="section-title">기간 설정</label>
             <div class="grid grid-cols-2 gap-2">
-              <input type="date" name="startDate" class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-              <input type="date" name="endDate" class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+              <input type="date" name="startDate" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+              <input type="date" name="endDate" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
             </div>
           </div>
 
           <!-- 상품 선택 -->
           <div class="search-option-group">
             <label class="section-title">상품</label>
-            <select name="product" class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            <select name="product" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
               <option value="">전체</option>
             </select>
           </div>
@@ -211,16 +211,16 @@
         <div class="col-span-2">
           <label class="block text-sm font-medium text-gray-700">기간 설정</label>
           <div class="mt-1 flex space-x-4">
-            <input type="date" name="startDate" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            <input type="date" name="startDate" class="bg-white border shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
             <span class="self-center">~</span>
-            <input type="date" name="endDate" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            <input type="date" name="endDate" class="bg-white border shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
           </div>
         </div>
 
         <!-- 상담사 선택 -->
         <div>
           <label class="block text-sm font-medium text-gray-700">상담사</label>
-          <select name="counselor" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          <select name="counselor" class="bg-white border mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             <option value="">전체</option>
           </select>
         </div>
@@ -230,7 +230,7 @@
           <div class="col-span-2 grid grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700">상품</label>
-              <select name="product" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <select name="product" class="bg-white border mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 <option value="">전체</option>
               </select>
             </div>
@@ -276,7 +276,10 @@
         </div>
 
         <!-- 검색 버튼 -->
-        <div class="col-span-3 flex justify-end">
+        <div class="col-span-3 flex justify-end space-x-2">
+          <button type="reset" class="px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            초기화
+          </button>
           <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
             조회
           </button>
