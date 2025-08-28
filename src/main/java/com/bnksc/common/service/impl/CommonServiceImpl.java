@@ -53,7 +53,7 @@ public class CommonServiceImpl implements CommonService {
         String filePath_str = (String) mstrCall.get("filePath");
 
         // 파일 경로 생성
-        Path filePath = Paths.get(basePath, taskId, filePath_str);
+        Path filePath = Paths.get(filePath_str);
 
         // 파일 존재 확인
         if (!Files.exists(filePath)) {

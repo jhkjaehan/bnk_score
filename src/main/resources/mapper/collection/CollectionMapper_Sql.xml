@@ -103,16 +103,12 @@
                 )
             </if>
             <if test="startDateMatur != null and startDateMatur != ''">
-                AND IFNULL(STR_TO_DATE(MARI1.RESULT_VALUE, '%Y%m%d%H%i'),
-                STR_TO_DATE(CONCAT(SUBSTRING(MARI1.RESULT_VALUE, 1, 4), '-',
-                        SUBSTRING(MARI1.RESULT_VALUE, 5, 2),'-01'),'%Y-%m-%d'))
+                AND MARI1.RESULT_VALUE
                         <![CDATA[ >= ]]>
                 #{startDateMatur}
             </if>
             <if test="endDateMatur != null and endDateMatur != ''">
-                AND IFNULL(STR_TO_DATE(MARI1.RESULT_VALUE, '%Y%m%d%H%i'),
-                STR_TO_DATE(CONCAT(SUBSTRING(MARI1.RESULT_VALUE, 1, 4), '-',
-                SUBSTRING(MARI1.RESULT_VALUE, 5, 2),'-01'),'%Y-%m-%d'))
+                AND MARI1.RESULT_VALUE
                 <![CDATA[ <= ]]>
                 #{endDateMatur}
             </if>
@@ -343,9 +339,7 @@
                           ELSE '' END AS "item04"
                   </when>
                   <when test="taskId[0] == 'TA0003'">
-                      , IFNULL(STR_TO_DATE(MARI1.RESULT_VALUE, '%Y%m%d%H%i'),
-                          CONCAT(SUBSTRING(MARI1.RESULT_VALUE, 1, 4), '-',
-                          SUBSTRING(MARI1.RESULT_VALUE, 5, 2)))      AS "item01"
+                      , MARI1.RESULT_VALUE      AS "item01"
                       , CASE
                           WHEN MARI2.result_value_a = 'Y' THEN '연장결정'
                           WHEN MARI2.result_value_b = 'Y' THEN '연장외결정'
