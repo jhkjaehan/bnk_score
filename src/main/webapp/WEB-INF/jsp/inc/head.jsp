@@ -5,6 +5,8 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
+<link rel="icon" href="${pageContext.request.contextPath}/img/favicon.ico" type="image/x-icon">
+
 <!-- 공통 스타일 -->
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/jquery/ui/jquery-ui.min.css" />
@@ -23,6 +25,8 @@
 <%--<script src="https://cdn.tailwindcss.com"></script>--%>
 <%-- 로컬 Tailwind CSS 추가 --%>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/tailwind/output.css" />
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/chart.js/dist/chart.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/chart.js/dist/chart.umd.js"></script>
 
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/common/common.js"></script>

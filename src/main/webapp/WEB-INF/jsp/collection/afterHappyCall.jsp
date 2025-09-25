@@ -4,7 +4,6 @@
 <html lang="ko">
 <head>
   <jsp:include page="/WEB-INF/jsp/inc/head.jsp"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
   <script type="text/javascript" src="${pageContext.request.contextPath}/js/collection/afterHappyCall.js"></script>
 </head>
 <body class="bg-gray-100">
