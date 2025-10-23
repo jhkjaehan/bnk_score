@@ -3,6 +3,7 @@ package com.bnksc.auto.web;
 import com.bnksc.auto.service.AutoService;
 import com.bnksc.common.web.BaseController;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,12 @@ public class AutoController extends BaseController {
             Object result = autoService.selectCallChartData(params);
             model.addAttribute("status", "success");
             model.addAttribute("data", result);
+
+            if(StringUtil.isNotBlank((String)params.get("counselor"))) {
+                params.remove("counselor");
+                Object allResult = autoService.selectCallChartData(params);
+                model.addAttribute("allResult", allResult);
+            }
 
         } catch (Exception e) {
             model.addAttribute("status", "error");

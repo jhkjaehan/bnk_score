@@ -132,13 +132,16 @@ function loadMstrScore(data) {
         "   <td class=\"px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900\">점수</td>" +
         "</tr>";
 
-    $("#scoreTable tbody tr").remove();
+    // $("#scoreTable tbody tr").remove();
 
     let dataRow = $(template);
 
     data.forEach((col,index) => {
+        
         if(index === 0){
             dataRow.append("<td class=\"px-6 py-4 whitespace-nowrap text-sm text-center text-blue-600 font-bold\" data-scoreid=\""+col.scoreId+"\" data-field=\"totalScore\">"+col.scoreValue+"</td>")
+        } else if(index === data.length -1) {
+            dataRow.append("<td class=\"px-6 py-4 whitespace-nowrap text-sm text-center text-red-600\" data-scoreid=\""+col.scoreId+"\">"+col.scoreValue+"</td>")
         } else {
             dataRow.append("<td class=\"px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900\" data-scoreid=\""+col.scoreId+"\">"+col.scoreValue+"</td>")
         }
@@ -217,7 +220,7 @@ function loadMstrContentList(data) {
         preItemId = row.itemId;
 
 
-        if(row.resultDialogue != undefined){
+        if(row.resultDialogue != undefined && row.resultDialogue != '' && row.resultDialogue != 'N' && row.resultDialogue != null){
             $newRow.find(".contentName").html('<button class="inline-flex items-center text-blue-600 hover:text-blue-800 focus:outline-none focus:underline cursor-pointer transition-colors duration-200">' +
                 row.contentName +
                 '            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
@@ -225,15 +228,22 @@ function loadMstrContentList(data) {
                 '                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>' +
                 '            </svg>' +
                 '        </button>');
+
+            // 툴팁 이벤트 추가
+            $newRow.find(".contentName button").on("mouseenter", function(e) {
+                showTooltip(e.target, row.resultDialogue);
+            }).on("mouseleave", function() {
+                hideTooltip();
+            });
+
+            $newRow.find(".contentName button").on("click", function(e) {
+                e.stopPropagation();
+                // 클릭 이벤트 처리
+                handleContentClick(row.resultDialogue);
+            });
         } else {
             $newRow.find(".contentName").text(row.contentName);
         }
-
-        $newRow.find(".contentName button").on("click", function(e) {
-            e.stopPropagation();
-            // 클릭 이벤트 처리
-            handleContentClick(row.resultDialogue);
-        });
 
         $newRow.find(".evaluationResult").text(row.evaluationResult);
         $("#mstrListTable tbody").append($newRow);
@@ -328,64 +338,3 @@ function handleContentClick(conText) {
 }
 
 
-
-function downloadDetails() {
-    // 현재 페이지의 데이터 수집
-    const data = {
-        // 대표정보
-        basicInfo: {
-            consultationDate: document.querySelector('[data-field="consultationDate"]').textContent,
-            customerNumber: document.querySelector('[data-field="customerNumber"]').textContent,
-            counselorNumber: document.querySelector('[data-field="counselorNumber"]').textContent,
-            counselorName: document.querySelector('[data-field="counselorName"]').textContent,
-            callNumber: document.querySelector('[data-field="callNumber"]').textContent
-        },
-        // 스크립트 Score
-        scoreInfo: {
-            total: document.querySelector('[data-field="totalScore"]').textContent,
-            identification: document.querySelector('[data-field="identificationScore"]').textContent,
-            greeting: document.querySelector('[data-field="greetingScore"]').textContent,
-            closing: document.querySelector('[data-field="closingScore"]').textContent,
-            essential: document.querySelector('[data-field="essentialScore"]').textContent,
-            mistake: document.querySelector('[data-field="mistakeScore"]').textContent
-        },
-        // 평가내용
-        evaluationInfo: []
-    };
-
-    // 평가내용 테이블의 데이터 수집
-    const evaluationRows = document.querySelectorAll('[data-evaluation-row]');
-    evaluationRows.forEach(row => {
-        data.evaluationInfo.push({
-            category: row.querySelector('[data-field="category"]').textContent,
-            item: row.querySelector('[data-field="item"]').textContent,
-            content: row.querySelector('[data-field="content"]').textContent,
-            result: row.querySelector('[data-field="result"]').textContent
-        });
-    });
-
-    // Excel 다운로드 요청
-    $.ajax({
-        url: '/common/downloadDetail.do',
-        method: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        xhrFields: {
-            responseType: 'blob'
-        },
-        success: function(blob) {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `상담정보_${data.basicInfo.callNumber}.xlsx`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
-        },
-        error: function(xhr, status, error) {
-            alert('다운로드 중 오류가 발생했습니다.');
-            console.error('Download error:', error);
-        }
-    });
-}

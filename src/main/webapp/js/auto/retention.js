@@ -5,6 +5,8 @@ let issueChart = null;
 let callsChartData = null;
 let scoreChartData = null;
 let problemChartData = null;
+let callsAllChartData = null;
+let selectedRowIndex = -1; // 선택된 행의 인덱스 추적
 
 // 데이터 예시
 let sampleData = [];
@@ -16,7 +18,7 @@ $(document).ready(function() {
     //화면 로드
     loadPage();
     //차트 로드
-    loadChartData();
+    // loadChartData();
 });
 
 function loadPage() {
@@ -33,6 +35,13 @@ function loadPage() {
 function searchList(Page) {
     var page = Page || 1;
     var searchForm = $("#searchForm").serializeArray();
+
+    // 페이지 이동인지 새로운 검색인지 구분
+    const isNewSearch = page === 1;
+    const loadingMessage = isNewSearch ? '검색 중입니다' : `${page}페이지를 불러오는 중입니다`;
+
+    // 로딩 화면 표시
+    showLoading('table', loadingMessage);
 
     // 선택된 고객의향 체크박스 배열로 변환
     var checkedIntentions = [];
@@ -55,14 +64,34 @@ function searchList(Page) {
         data: data,
         traditional: false,
         success: function(response) {
-            const data = response.data;
-            console.log(data);
-            loadMstrSearchList(data);
-            updatePagination(data.currentPage, data.totalPages);
+            // 최소 500ms 로딩 표시 (너무 빠른 응답 시 깜빡임 방지)
+            setTimeout(() => {
+                try {
+                    const data = response.data;
+                    loadMstrSearchList(data);
+                    updatePagination(data.currentPage, data.totalPages);
+                } catch (error) {
+                    console.error('데이터 처리 중 오류:', error);
+                    showToastMessage('데이터 처리 중 오류가 발생했습니다.', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }, 500);
         },
         error: function(xhr, status, error) {
+            hideLoading();
             console.error('데이터 조회 실패:', error);
-            alert('데이터 조회 중 오류가 발생했습니다.');
+
+            let errorMessage = '데이터 조회 중 오류가 발생했습니다.';
+            if (xhr.status === 500) {
+                errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+            } else if (xhr.status === 404) {
+                errorMessage = '요청한 페이지를 찾을 수 없습니다.';
+            } else if (xhr.status === 0) {
+                errorMessage = '네트워크 연결을 확인해주세요.';
+            }
+
+            showToastMessage(errorMessage, 'error');
         }
     })
 }
@@ -92,24 +121,50 @@ function loadMstrSearchList(data) {
 
     // 목록 초기화
     $('#mstrListTable tbody').empty();
+    selectedRowIndex = -1; // 선택된 행 인덱스 초기화
 
     if(data == null || data == undefined) {
         console.log("error! 데이터가 없습니다.");
         return false;
     }
-    data.forEach(row => {
+    data.forEach((row, index) => {
         const $trTemplate = $(trTemplate);
-        $trTemplate.append($(tdTemplate).text(row.callDt));
-        $trTemplate.append($(tdTemplate).text(row.custNum));
-        $trTemplate.append($(tdTemplate).text(row.item01)); // 만기일자
-        $trTemplate.append($(tdTemplate).text(row.counselorCd));
-        $trTemplate.append($(tdTemplate).text(row.counselorName));
-        $trTemplate.append($(tdTemplate).addClass("cursor-pointer text-blue-600 hover:text-blue-800").on("click",function(){ openDetailPage(row.callId,row.taskId) }).text(row.callId));
-        $trTemplate.append($(tdTemplate).text(row.item02)); // 결정구분
-        $trTemplate.append($(tdTemplate).text(row.item03)); // 고객의향
-        $trTemplate.append($(tdTemplate).text(row.item04)); // 리콜약속
-        $trTemplate.append($(tdTemplate).text(row.item05)); // 약속일시
-        $trTemplate.append($(tdTemplate).text(row.scoreValue));
+
+        // 행 클릭 이벤트 추가 (전체 행 클릭 가능)
+        $trTemplate.on("click", function(e) {
+            // 이전에 선택된 행의 스타일 제거
+            $('#mstrListTable tbody tr').removeClass('selected-row');
+
+            // 현재 행에 선택 스타일 적용
+            $(this).addClass('selected-row');
+            selectedRowIndex = index;
+
+            // Call 번호 셀을 클릭한 경우에만 상세 페이지 열기
+            if ($(e.target).hasClass('call-number-link') || $(e.target).closest('.call-number-cell').length > 0) {
+                openDetailPage(row.callId, row.taskId);
+            }
+        });
+
+        $trTemplate.append($(tdTemplate).text(row.callDt).addClass("text-center"));
+        $trTemplate.append($(tdTemplate).text(row.custNum).addClass("text-center"));
+        $trTemplate.append($(tdTemplate).text(row.item01).addClass("text-center")); // 만기일자
+        $trTemplate.append($(tdTemplate).text(row.counselorCd).addClass("text-center"));
+        $trTemplate.append($(tdTemplate).text(row.counselorName).addClass("text-center"));
+        // Call 번호 컬럼에 특별한 클래스 추가
+        const callNumberCell = $(tdTemplate)
+            .addClass("text-center call-number-cell")
+            .append(
+                $('<span>')
+                    .addClass("call-number-link text-blue-600 hover:text-blue-800")
+                    .text(row.callId)
+            );
+        $trTemplate.append(callNumberCell);
+        // $trTemplate.append($(tdTemplate).addClass("cursor-pointer text-blue-600 hover:text-blue-800").on("click",function(){ openDetailPage(row.callId,row.taskId) }).text(row.callId));
+        $trTemplate.append($(tdTemplate).text(row.item02).addClass("text-center")); // 결정구분
+        $trTemplate.append($(tdTemplate).text(row.item03).addClass("text-center")); // 고객의향
+        $trTemplate.append($(tdTemplate).text(row.item04).addClass("text-center")); // 리콜약속
+        $trTemplate.append($(tdTemplate).text(row.item05).addClass("text-center")); // 약속일시
+        $trTemplate.append($(tdTemplate).text(row.scoreValue).addClass("text-right"));
 
         mstrListTable.find("tbody").append($trTemplate);
     })
@@ -185,6 +240,7 @@ function openDetailPage(callId,taskId) {
 
 // 목록 다운로드 버튼 클릭 이벤트 핸들러
 function downloadList() {
+    showLoading('minimal', '엑셀 파일을 생성하는 중입니다');
     // 현재 검색 조건 가져오기
     const searchForm = $("#searchForm").serializeArray();
 
@@ -201,7 +257,6 @@ function downloadList() {
     data.push({name:"headerNames", value: headerNames});
     data.push({name:"headerKeys", value: headerKeys});
 
-    console.log(data);
 
     // AJAX 요청
     $.ajax({
@@ -212,6 +267,7 @@ function downloadList() {
             responseType: 'blob'
         },
         success: function(blob) {
+            hideLoading();
             // 파일 다운로드
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -223,6 +279,7 @@ function downloadList() {
             a.remove();
         },
         error: function(xhr, status, error) {
+            hideLoading();
             console.error('다운로드 실패:', error);
             alert('목록 다운로드 중 오류가 발생했습니다.');
         }
@@ -243,6 +300,7 @@ function loadChartData() {
 }
 
 function selectCallChartData() {
+    showLoading('full');
 
     var searchForm = $("#statsSearchForm").serializeArray();
     var checkedIntentions = [];
@@ -262,19 +320,34 @@ function selectCallChartData() {
         method: 'POST',
         data: data,
         success: function(response) {
-            console.log(response);
-            initChartData(response.data,"TA0003","CALL");
-            // initChartData(response.callChartData,"TA0001","CALL");
-            // initChartData(response.scoreChartData,"TA0001","SCORE");
-            // initChartData(response.problemChartData,"TA0001","PROBLEM");
+            // 최소 500ms 로딩 표시 (너무 빠른 응답 시 깜빡임 방지)
+            setTimeout(() => {
+                try {
+                    initChartData(response.data,"TA0003","CALL");
+                    initChartData(response.allResult,"TA0003","ALL");
 
-            initSheetData(response.data);
+                    initSheetData(response.data);
 
-            initializeCharts();
+                    initializeCharts();
+                } finally {
+                    hideLoading();
+                }
+            }, 500);
         },
         error: function(xhr, status, error) {
+            hideLoading();
             console.error('데이터 조회 실패:', error);
-            alert('데이터 조회 중 오류가 발생했습니다.');
+
+            let errorMessage = '데이터 조회 중 오류가 발생했습니다.';
+            if (xhr.status === 500) {
+                errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+            } else if (xhr.status === 404) {
+                errorMessage = '요청한 페이지를 찾을 수 없습니다.';
+            } else if (xhr.status === 0) {
+                errorMessage = '네트워크 연결을 확인해주세요.';
+            }
+
+            showToastMessage(errorMessage, 'error');
         }
     })
 }
@@ -307,16 +380,13 @@ function initChartData(data,taskId,type) {
             scoreChartData = null;
         } else if(type == "PROBLEM") {
             problemChartData = null;
+        } else if(type == "ALL") {
+            callsAllChartData = null;
         }
         return false;
     }
 
     let chartData = data;
-    /*if(taskId != null && taskId != '') {
-        chartData = data.filter(row => {
-            return row.taskId == taskId;
-        });
-    }*/
 
     if(type == "CALL") {
         callsChartData = chartData;
@@ -324,6 +394,8 @@ function initChartData(data,taskId,type) {
         scoreChartData = chartData;
     } else if(type == "PROBLEM") {
         problemChartData = chartData;
+    } else if(type == "ALL") {
+        callsAllChartData = chartData;
     }
 
 }
@@ -332,32 +404,63 @@ function initializeCharts() {
     // 기존 차트 제거
     destroyCharts();
 
-    const callNameList = [];
-    const callCntList = [];
     const ccData = callsChartData.filter(data => {
         return data.itemId == "I0000";
     });
 
-
-    const callMaxDt = Math.max(ccData[0].callCnt, ccData[0].custCnt, ccData[0].expCustCnt);
-
-    // 콜수/고객수/상담수 차트
-    callsChart = new Chart($('#callsChart'), {
-        type: 'bar',
-        data: {
-            labels: ["콜수", "상담고객수", "만기고객수"],
-            datasets: [{
+    let datasets = null;
+    let callMaxDt = Math.max(ccData[0].callCnt, ccData[0].custCnt, ccData[0].expCustCnt);
+    if(callsAllChartData != null) {
+        const callAllData = callsAllChartData.filter(data => {
+            return data.itemId == "I0000";
+        });
+        datasets = [
+            {
+                label: '전체',
+                data: [callAllData[0].callCnt, callAllData[0].custCnt, callAllData[0].expCustCnt],
+                backgroundColor: [
+                    'rgba(255, 206, 86, 0.7)', // 노란색
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(255, 99, 132, 0.7)'
+                ]
+            },
+            {
+                label : '상담사',
                 data: [ccData[0].callCnt, ccData[0].custCnt, ccData[0].expCustCnt],
                 backgroundColor: [
                     'rgba(54, 162, 235, 0.7)',
                     'rgba(75, 192, 192, 0.7)',
                     'rgba(153, 102, 255, 0.7)'
                 ]
-            }]
+            }
+        ]
+        callMaxDt = Math.max(callMaxDt, callAllData[0].callCnt, callAllData[0].custCnt, callAllData[0].expCustCnt);
+    } else {
+        datasets = [
+            {
+                label : '상담사',
+                data: [ccData[0].callCnt, ccData[0].custCnt, ccData[0].expCustCnt],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ]
+            }
+        ]
+    }
+
+
+    // 콜수/고객수/상담수 차트
+    callsChart = new Chart($('#callsChart'), {
+        type: 'bar',
+        data: {
+            labels: ["콜수", "상담고객수", "만기고객수"],
+            datasets: datasets
         },
         options: {
             indexAxis: 'y',  // 가로 막대 차트
             responsive: true,
+            maintainAspectRatio: false, // 추가: 가로세로 비율 고정 해제
             plugins: {
                 legend: {
                     display: false
@@ -425,6 +528,7 @@ function initializeCharts() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false, // 추가: 가로세로 비율 고정 해제
             plugins: {
                 legend: {
                     display: false
@@ -570,6 +674,8 @@ function renderStatsDetailGrid(data) {
 
 // 엑셀 다운로드 함수
 function downloadStats() {
+    showLoading('minimal', '엑셀 파일을 생성하는 중입니다');
+
     let headerNames = [];
     let headerKeys = [];
     $("#mstrStatsTable tr th").each(function() {
@@ -613,6 +719,7 @@ function downloadStats() {
             responseType: 'blob'
         },
         success: function(blob) {
+            hideLoading();
             // 파일 다운로드
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -624,46 +731,24 @@ function downloadStats() {
             a.remove();
         },
         error: function(xhr, status, error) {
+            hideLoading();
             console.error('다운로드 실패:', error);
             alert('통계 다운로드 중 오류가 발생했습니다.');
         }
     });
 }
 
-// 차트 데이터 업데이트 함수
-function updateCharts(newData) {
-    // 기존 차트들이 존재하는지 확인하고 업데이트
-    if (!callsChart || !scoreChart || !issueChart) {
-        initializeCharts();
-        return;
-    }
-
-    // 각 차트 데이터 업데이트
-    callsChart.data = newData.callsData;
-    callsChart.update();
-
-    scoreChart.data = newData.scoreData;
-    scoreChart.update();
-
-    issueChart.data = newData.issueData;
-    issueChart.update();
-}
-
-
-// 검색 조건 초기화 함수
-function resetSearchForm() {
-    $('#statsSearchForm')[0].reset();
-    destroyCharts();
-    initializeCharts();
-}
-
-// AJAX 성공 시 데이터 렌더링
-function updateStatsDetail(response) {
-    renderStatsDetailGrid(response.data);
-}
 
 function bindEvent() {
     commonBindEvent();
+
+    $('.tab-link').click(function(e) {
+        const target = $(this).data('tab');
+
+        if (target === 'stats') {
+            loadChartData();
+        }
+    })
 
     $(".sortable th").on("click", function(e) {
         const column = $(this).data('sort');
@@ -679,12 +764,25 @@ function bindEvent() {
 
     // 정렬 초기화 버튼 이벤트
     $('#resetSortBtn').on('click', function() {
+        // 버튼 로딩 상태 표시
+        const $btn = $(this);
+        const originalHtml = $btn.html();
+
+        $btn.prop('disabled', true).html(`
+            <svg class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            정렬 초기화 중...
+        `);
+
         resetSort();
 
+        // 정렬 초기화 후 검색
         // 시각적 피드백을 위한 애니메이션 효과
-        $(this).find("svg").addClass('animate-spin');
         setTimeout(() => {
-            $(this).find("svg").removeClass('animate-spin');
+            searchList(1);
+            $btn.prop('disabled', false).html(originalHtml);
+            showToastMessage('정렬이 초기화되었습니다.', 'info');
         }, 500);
 
         searchList();
@@ -709,4 +807,32 @@ function bindEvent() {
     });
 
     $('.download-list-btn').on('click', downloadList);
+
+    $("#listTab input[name=intention]").on("change", function(){
+        const $listTab = $("#listTab");
+        const isAllCheckbox = $(this).val() === "";
+
+        if(isAllCheckbox) {
+            checkboxToggleAll(this, "intention","listTab");
+        } else {
+            const $allCheckbox = $listTab.find("input[name=intention][value='']");
+            const uncheckedItems = $listTab.find("input[name=intention]:not([value='']):not(:checked)");
+
+            $allCheckbox.prop("checked", uncheckedItems.length === 0);
+        }
+    })
+
+    $("#statsTab input[name=intention]").on("change", function(){
+        const $statsTab = $("#statsTab");
+        const isAllCheckbox = $(this).val() === "";
+
+        if(isAllCheckbox) {
+            checkboxToggleAll(this, "intention","statsTab");
+        } else {
+            const $allCheckbox = $statsTab.find("input[name=intention][value='']");
+            const uncheckedItems = $statsTab.find("input[name=intention]:not([value='']):not(:checked)");
+
+            $allCheckbox.prop("checked", uncheckedItems.length === 0);
+        }
+    })
 }

@@ -5,6 +5,7 @@ import com.bnksc.common.service.CommonService;
 import com.bnksc.utils.ExcelService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,6 +160,18 @@ public class CommonController {
             model.addAttribute("callChartData", callChartData);
             model.addAttribute("scoreChartData", scoreChartData);
             model.addAttribute("problemChartData", problemChartData);
+
+            if(StringUtil.isNotBlank((String)params.get("counselor"))) {
+                params.remove("counselor");
+
+                Object callAllChartData = commonService.selectCallChartData(params);
+                Object scoreAllChartData = commonService.selectScoreChartData(params);
+                Object problemAllChartData = commonService.selectProblemChartData(params);
+
+                model.addAttribute("callAllChartData", callAllChartData);
+                model.addAttribute("scoreAllChartData", scoreAllChartData);
+                model.addAttribute("problemAllChartData", problemAllChartData);
+            }
 
         } catch (Exception e) {
             model.addAttribute("status", "error");

@@ -2,6 +2,7 @@ package com.bnksc.retail.web;
 
 import com.bnksc.common.web.BaseController;
 import com.bnksc.retail.service.RetailService;
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -52,6 +53,12 @@ public class RetailController extends BaseController {
             Object result = retailService.selectCallChartData(params);
             model.addAttribute("status", "success");
             model.addAttribute("data", result);
+
+            if(StringUtil.isNotBlank((String)params.get("counselor"))) {
+                params.remove("counselor");
+                Object allResult = retailService.selectCallChartData(params);
+                model.addAttribute("allResult", allResult);
+            }
 
         } catch (Exception e) {
             model.addAttribute("status", "error");

@@ -23,67 +23,73 @@
       <h2 class="text-lg font-semibold text-black-800 mb-4">검색 조건</h2>
       <form id="searchForm" class="space-y-4">
         <div class="grid grid-cols-3 gap-4">
+          <!-- 고객번호 입력 -->
+          <div class="flex items-center">
+            <label class="w-24 font-medium">고객번호</label>
+            <input type="text" name="custNum" class="bg-white border border-gray-300 flex-1 border rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
           <!-- 상담사 선택 -->
-          <div class="search-option-group">
-            <label class="section-title">상담사</label>
-            <select name="counselor" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+          <div class="flex items-center">
+            <label class="w-24 font-medium">상담사</label>
+            <select name="counselor" class="bg-white border border-gray-300 flex-1 border rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
               <option value="">선택하세요</option>
             </select>
           </div>
 
           <!-- 기간 설정 -->
-          <div class="search-option-group">
-            <label class="section-title">기간 설정</label>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="date" name="startDate" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-              <input type="date" name="endDate" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-            </div>
+          <div class="flex items-center">
+            <label class="w-24 font-medium">기간설정</label>
+            <input type="date" name="startDate" class="bg-white border border-gray-300 border rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
+            <span class="mx-2">~</span>
+            <input type="date" name="endDate" class="bg-white border border-gray-300 border rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
           </div>
 
-          <!-- 상품 선택 -->
-          <div class="search-option-group">
-            <label class="section-title">상품</label>
-            <select name="product" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-              <option value="">전체</option>
-            </select>
-          </div>
         </div>
 
         <div class="search-option-group">
-          <div class="grid grid-cols-5 gap-4">
+          <div class="grid grid-cols-3 gap-4">
+            <!-- 상품 선택 -->
+            <div class="flex items-center col-span-1">
+              <label class="w-24 font-medium">상품</label>
+              <select name="product" class="bg-white border border-gray-300 flex-1 border rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">전체</option>
+              </select>
+            </div>
+
             <!-- 수수료/이면약정 -->
-            <div>
-              <label class="section-title">수수료/이면약정</label>
-              <div class="radio-group">
-                <label class="radio-label">
-                  <input type="radio" name="csAgmt" value="" class="radio-input" checked>
+            <div class="flex items-center">
+              <label class="w-24 font-medium">수수료/이면약정</label>
+              <div class="flex space-x-4">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="csAgmt" value="" class="mr-1" checked>
                   <span class="radio-text">전체</span>
                 </label>
-                <label class="radio-label">
-                  <input type="radio" name="csAgmt" value="Y" class="radio-input">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="csAgmt" value="Y" class="mr-1">
                   <span class="radio-text">Y</span>
                 </label>
-                <label class="radio-label">
-                  <input type="radio" name="csAgmt" value="N" class="radio-input">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="csAgmt" value="N" class="mr-1">
                   <span class="radio-text">N</span>
                 </label>
               </div>
             </div>
 
             <!-- 계약외지원약속 -->
-            <div>
-              <label class="section-title">계약외지원약속</label>
-              <div class="radio-group">
-                <label class="radio-label">
-                  <input type="radio" name="ncSupport" value="" class="radio-input" checked>
+            <div class="flex items-center">
+              <label class="w-24 font-medium">계약외지원약속</label>
+              <div class="flex space-x-4">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="ncSupport" value="" class="mr-1" checked>
                   <span class="radio-text">전체</span>
                 </label>
-                <label class="radio-label">
-                  <input type="radio" name="ncSupport" value="Y" class="radio-input">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="ncSupport" value="Y" class="mr-1">
                   <span class="radio-text">Y</span>
                 </label>
-                <label class="radio-label">
-                  <input type="radio" name="ncSupport" value="N" class="radio-input">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="ncSupport" value="N" class="mr-1">
                   <span class="radio-text">N</span>
                 </label>
               </div>
@@ -132,44 +138,45 @@
       </div>
 
       <div class="overflow-x-auto">
-        <table id="mstrHappyTable" class="sortable min-w-full divide-y divide-gray-200">
+        <table id="mstrListTable" class="sortable min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
           <tr>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callDt">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callDt">
               상담일자
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="custNum">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="custNum">
               고객번호
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorCd">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorCd">
               상담사번호
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorName">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorName">
               상담사명
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callId">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callId">
               Call 번호
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="taskName">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="taskName">
               상품
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="scoreValue">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="scoreValue">
               스크립트 Score
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
+              <br>(50)
             </th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item01">수수료/이면약정</th>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item02">계약외지원약속</th>
+            <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item01">수수료/이면약정</th>
+            <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item02">계약외지원약속</th>
           </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200" id="callListBody">

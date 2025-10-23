@@ -81,27 +81,39 @@
             <if test="recallprom != null and recallprom != ''">
                 AND IFNULL(MARI4.RESULT_VALUE,'N') = #{recallprom}
             </if>
-            <if test="intention != null and intention != ''">
-                AND (
-                <foreach item="item" collection="intentions" separator=" OR ">
-                <if test="item == 'C0059'">
-                    IFNULL(MARI3.RESULT_VALUE_A,'N') = 'Y'
-                </if>
-                <if test="item == 'C0060'">
-                    IFNULL(MARI3.RESULT_VALUE_B,'N') = 'Y'
-                </if>
-                <if test="item == 'C0061'">
-                    IFNULL(MARI3.RESULT_VALUE_C,'N') = 'Y'
-                </if>
-                <if test="item == 'C0062'">
-                    IFNULL(MARI3.RESULT_VALUE_D,'N') = 'Y'
-                </if>
-                <if test="item == 'C0063'">
-                    IFNULL(MARI3.RESULT_VALUE_E,'N') = 'Y'
-                </if>
-                </foreach>
-                )
-            </if>
+            <choose>
+                <when test="intention != null and intention != ''">
+                    AND (
+                    <foreach item="item" collection="intentions" separator=" OR ">
+                        <if test="item == 'C0059'">
+                            IFNULL(MARI3.RESULT_VALUE_A,'N') = 'Y'
+                        </if>
+                        <if test="item == 'C0060'">
+                            IFNULL(MARI3.RESULT_VALUE_B,'N') = 'Y'
+                        </if>
+                        <if test="item == 'C0061'">
+                            IFNULL(MARI3.RESULT_VALUE_C,'N') = 'Y'
+                        </if>
+                        <if test="item == 'C0062'">
+                            IFNULL(MARI3.RESULT_VALUE_D,'N') = 'Y'
+                        </if>
+                        <if test="item == 'C0063'">
+                            IFNULL(MARI3.RESULT_VALUE_E,'N') = 'Y'
+                        </if>
+                    </foreach>
+                    )
+                </when>
+                <when test="taskId[0] == 'TA0003' and intention == null">
+                    AND IFNULL(MARI3.RESULT_VALUE_A,'N') = 'N'
+                    AND IFNULL(MARI3.RESULT_VALUE_B,'N') = 'N'
+                    AND IFNULL(MARI3.RESULT_VALUE_C,'N') = 'N'
+                    AND IFNULL(MARI3.RESULT_VALUE_D,'N') = 'N'
+                    AND IFNULL(MARI3.RESULT_VALUE_E,'N') = 'N'
+                </when>
+                <otherwise>
+                    <!-- 아무 조건 없음 -->
+                </otherwise>
+            </choose>
             <if test="startDateMatur != null and startDateMatur != ''">
                 AND MARI1.RESULT_VALUE
                         <![CDATA[ >= ]]>
@@ -332,6 +344,7 @@
                   <when test="taskId[0] == 'TA0002'">
                       , IFNULL(MARI1.RESULT_VALUE, 'N')     AS "item01"
                       , IFNULL(STR_TO_DATE(MARI2.RESULT_VALUE,'%Y%m%d%H%i'),CONCAT(SUBSTRING(MARI2.RESULT_VALUE,1,4),'-',SUBSTRING(MARI2.RESULT_VALUE,5,2))) AS "item02"
+                      /*, DATE_FORMAT(STR_TO_DATE(MARI2.RESULT_VALUE,'%Y-%m-%d'),'%Y-%m-%d') AS "item02"*/
                       , IFNULL(MARI3.RESULT_VALUE, 'N')     AS "item03"
                       , CASE WHEN MARI4.result_value_a = 'Y' THEN '성사'
                           WHEN MARI4.result_value_b = 'Y' THEN '거절'
@@ -340,6 +353,7 @@
                   </when>
                   <when test="taskId[0] == 'TA0003'">
                       , MARI1.RESULT_VALUE      AS "item01"
+                      /*, DATE_FORMAT(STR_TO_DATE(MARI1.RESULT_VALUE,'%Y-%m-%d'),'%Y-%m-%d') AS "item01"*/
                       , CASE
                           WHEN MARI2.result_value_a = 'Y' THEN '연장결정'
                           WHEN MARI2.result_value_b = 'Y' THEN '연장외결정'
@@ -364,7 +378,8 @@
                           )
                         AS "item03"
                         , IFNULL(MARI4.RESULT_VALUE, 'N')     AS "item04"
-                        , IFNULL(STR_TO_DATE(MARI5.RESULT_VALUE,'%Y%m%d%H%i'),CONCAT(SUBSTRING(MARI5.RESULT_VALUE,1,4),'-',SUBSTRING(MARI5.RESULT_VALUE,5,2))) AS "item05"
+                        /*, IFNULL(STR_TO_DATE(MARI5.RESULT_VALUE,'%Y%m%d%H%i'),CONCAT(SUBSTRING(MARI5.RESULT_VALUE,1,4),'-',SUBSTRING(MARI5.RESULT_VALUE,5,2))) AS "item05"*/
+                        , DATE_FORMAT(STR_TO_DATE(MARI5.RESULT_VALUE,'%Y-%m-%d'),'%Y-%m-%d') AS "item05"
                   </when>
                   <otherwise>
                       , IFNULL(MARI1.RESULT_VALUE,'N') AS "item01"

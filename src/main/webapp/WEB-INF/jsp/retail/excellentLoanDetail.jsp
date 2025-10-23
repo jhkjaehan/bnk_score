@@ -14,7 +14,7 @@
 <!-- 페이지 최상단에 다운로드 버튼 추가 -->
 <div class="max-w-6xl mx-auto p-6 space-y-6">
     <div class="mb-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-gray-900">사후해피콜 상세</h1>
+        <h1 class="text-xl font-bold text-gray-900">우수고객 추가대출 상세</h1>
         <button onclick="downloadDetail()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -30,7 +30,7 @@
             </svg>
             대표정보
         </h2>
-        <div class="grid grid-cols-4 gap-4" id="detailMstrInfo">
+        <div class="grid grid-cols-4 gap-4" id="detailMstrInfo" style="font-size:14px;">
             <div class="flex items-center space-x-2">
                 <span class="text-gray-600 font-medium">상담일자:</span>
                 <span data-field="callDt">2025-07-21</span>
@@ -72,12 +72,19 @@
                 <tr class="bg-gray-50">
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">항목</th>
                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">진행가능성 Score</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">단계진행(+)</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">리콜(+)</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">고객반응(+)</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">단계진행</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">리콜</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">고객반응</th>
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">배점</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">100</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">50</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">30</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">20</td>
+                    </tr>
                 </tbody>
             </table>
         </div>

@@ -30,7 +30,7 @@
             </svg>
             대표정보
         </h2>
-        <div class="grid grid-cols-4 gap-4" id="detailMstrInfo">
+        <div class="grid grid-cols-4 gap-4" id="detailMstrInfo" style="font-size:14px;">
             <div class="flex items-center space-x-2">
                 <span class="text-gray-600 font-medium">상담일자:</span>
                 <span data-field="callDt">2025-07-21</span>
@@ -80,6 +80,15 @@
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">배점</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">20</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">5</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">5</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">5</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">5</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-red-600">-5</td>
+                    </tr>
                 </tbody>
             </table>
         </div>

@@ -13,7 +13,8 @@
 </form>
 <!-- 페이지 최상단에 다운로드 버튼 추가 -->
 <div class="max-w-6xl mx-auto p-6 space-y-6">
-    <div class="flex justify-end">
+    <div class="mb-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-gray-900">리텐션 상세</h1>
         <button onclick="downloadDetail()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -29,7 +30,7 @@
             </svg>
             대표정보
         </h2>
-        <div class="grid grid-cols-4 gap-4" id="detailMstrInfo">
+        <div class="grid grid-cols-4 gap-4" id="detailMstrInfo" style="font-size:14px;">
             <div class="flex items-center space-x-2">
                 <span class="text-gray-600 font-medium">상담일자:</span>
                 <span data-field="callDt">2025-07-21</span>
@@ -80,13 +81,13 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">점수</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-blue-600 font-bold" data-field="totalScore">80</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">배점</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">120</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">40</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">20</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">20</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">0</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-red-600">0</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">30</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">40</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">10</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-red-600">-20</td>
                 </tr>
                 </tbody>
             </table>

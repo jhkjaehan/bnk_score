@@ -3,6 +3,7 @@
   <component name="WebContextManager">
     <option name="state">
       <map>
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/auto/retention.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/auto" />
         <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/collection/nonpayment.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/collection" />
         <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/inc/head.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/inc" />
         <entry key="file://$PROJECT_DIR$/src/main/webapp/index.jsp" value="file://$PROJECT_DIR$/src/main/webapp" />

@@ -287,7 +287,7 @@ function loadMstrContentList(data) {
         preItemId = row.itemId;
 
 
-        if(row.resultDialogue != undefined){
+        if(row.resultDialogue != undefined && row.resultDialogue != '' && row.resultDialogue != 'N' && row.resultDialogue != null){
             $newRow.find(".contentName").html('<button class="inline-flex items-center text-blue-600 hover:text-blue-800 focus:outline-none focus:underline cursor-pointer transition-colors duration-200">' +
                 row.contentName +
                 '            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
@@ -295,15 +295,23 @@ function loadMstrContentList(data) {
                 '                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>' +
                 '            </svg>' +
                 '        </button>');
+
+            // 툴팁 이벤트 추가
+            $newRow.find(".contentName button").on("mouseenter", function(e) {
+                showTooltip(e.target, row.resultDialogue);
+            }).on("mouseleave", function() {
+                hideTooltip();
+            });
+
+            $newRow.find(".contentName button").on("click", function(e) {
+                e.stopPropagation();
+                // 클릭 이벤트 처리
+                handleContentClick(row.resultDialogue);
+            });
         } else {
             $newRow.find(".contentName").text(row.contentName);
         }
 
-        $newRow.find(".contentName button").on("click", function(e) {
-            e.stopPropagation();
-            // 클릭 이벤트 처리
-            handleContentClick(row.resultDialogue);
-        });
 
         $newRow.find(".evaluationResult").text(row.evaluationResult);
         $("#mstrListTable tbody").append($newRow);

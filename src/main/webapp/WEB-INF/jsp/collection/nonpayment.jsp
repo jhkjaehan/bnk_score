@@ -23,22 +23,22 @@
             <h2 class="text-lg font-semibold text-black-800 mb-4">검색 조건</h2>
             <form id="searchForm" class="space-y-4">
                 <!-- 상단 검색 옵션 -->
-                <div class="grid grid-cols-2 gap-4">
-                    <!-- 상담사 선택 -->
-                    <div class="search-option-group">
-                        <label class="section-title">상담사</label>
-                        <select name="counselor" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="flex items-center">
+                        <label class="w-24 font-medium">고객번호</label>
+                        <input type="text" name="custNum" class="bg-white border border-gray-300 flex-1 border rounded px-2 py-1">
+                    </div>
+                    <div class="flex items-center">
+                        <label class="w-24 font-medium">상담사</label>
+                        <select name="counselor" class="bg-white border border-gray-300 flex-1 border rounded px-2 py-1">
                             <option value="">선택하세요</option>
                         </select>
                     </div>
-
-                    <!-- 기간 설정 -->
-                    <div class="search-option-group">
-                        <label class="section-title">기간 설정</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="date" name="startDate" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                            <input type="date" name="endDate" class="bg-white border block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                        </div>
+                    <div class="flex items-center">
+                        <label class="w-24 font-medium">기간설정</label>
+                        <input type="date" name="startDate" class="bg-white border border-gray-300 border rounded px-2 py-1">
+                        <span class="mx-2">~</span>
+                        <input type="date" name="endDate" class="bg-white border border-gray-300 border rounded px-2 py-1">
                     </div>
                 </div>
 
@@ -46,76 +46,76 @@
                 <div class="search-option-group">
                     <div class="grid grid-cols-5 gap-4">
                         <!-- 오안내 -->
-                        <div>
-                            <label class="section-title">오안내</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="wrongGuide" value="" class="radio-input" checked>
+                        <div class="flex items-center">
+                            <label class="w-24 font-medium">오안내</label>
+                            <div class="flex space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="wrongGuide" value="" class="mr-1" checked>
                                     <span class="radio-text">전체</span>
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="wrongGuide" value="Y" class="radio-input">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="wrongGuide" value="Y" class="mr-1">
                                     <span class="radio-text">Y</span>
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="wrongGuide" value="N" class="radio-input">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="wrongGuide" value="N" class="mr-1">
                                     <span class="radio-text">N</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- 금지문구 -->
-                        <div>
-                            <label class="section-title">금지문구</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="banned" value="" class="radio-input" checked>
+                        <div class="flex items-center">
+                            <label class="w-24 font-medium">금지문구</label>
+                            <div class="flex space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="banned" value="" class="mr-1" checked>
                                     <span class="radio-text">전체</span>
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="banned" value="Y" class="radio-input">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="banned" value="Y" class="mr-1">
                                     <span class="radio-text">Y</span>
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="banned" value="N" class="radio-input">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="banned" value="N" class="mr-1">
                                     <span class="radio-text">N</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- 불법추심 -->
-                        <div>
-                            <label class="section-title">불법추심</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="illegal" value="" class="radio-input" checked>
+                        <div class="flex items-center">
+                            <label class="w-24 font-medium">불법추심</label>
+                            <div class="flex space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="illegal" value="" class="mr-1" checked>
                                     <span class="radio-text">전체</span>
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="illegal" value="Y" class="radio-input">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="illegal" value="Y" class="mr-1">
                                     <span class="radio-text">Y</span>
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="illegal" value="N" class="radio-input">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="illegal" value="N" class="mr-1">
                                     <span class="radio-text">N</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- 납부의사 -->
-                        <div class="col-span-2">
-                            <label class="section-title">납부의사</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="paymentWill" value="" class="radio-input" checked>
+                        <div class="flex items-center col-span-2">
+                            <label class="w-24 font-medium">납부의사</label>
+                            <div class="flex space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="paymentWill" value="" class="mr-1" checked>
                                     <span class="radio-text">전체</span>
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="paymentWill" value="Y" class="radio-input">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="paymentWill" value="Y" class="mr-1">
                                     <span class="radio-text">Y</span>
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="paymentWill" value="N" class="radio-input">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="paymentWill" value="N" class="mr-1">
                                     <span class="radio-text">N</span>
                                 </label>
                             </div>
@@ -163,49 +163,50 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table id="mstrNonpayTable" class="sortable min-w-full divide-y divide-gray-200">
+                <table id="mstrListTable" class="sortable min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callDt">
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callDt">
                             상담일자
                             <span class="sort-icon" data-direction="none"></span>
                             <span class="sort-order"></span>
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="custNum">
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="custNum">
                             고객번호
                             <span class="sort-icon" data-direction="none"></span>
                             <span class="sort-order"></span>
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorCd">
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorCd">
                             상담사번호
                             <span class="sort-icon" data-direction="none"></span>
                             <span class="sort-order"></span>
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorName">
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorName">
                             상담사명
                             <span class="sort-icon" data-direction="none"></span>
                             <span class="sort-order"></span>
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callId">
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callId">
                             Call 번호
                             <span class="sort-icon" data-direction="none"></span>
                             <span class="sort-order"></span>
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="scoreValue">
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="scoreValue">
                             Score
                             <span class="sort-icon" data-direction="none"></span>
                             <span class="sort-order"></span>
+                            <br>(20)
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item05">
-                            오안내
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item05">
+                            오안내<br>(-5)
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item07">
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item07">
                             금지문구
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item06">
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item06">
                             불법추심
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item08">
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item08">
                             납부의사
                         </th>
                     </tr>

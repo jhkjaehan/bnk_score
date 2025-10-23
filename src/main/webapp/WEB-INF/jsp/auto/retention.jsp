@@ -57,7 +57,7 @@
           <!-- 고객의향 -->
           <div class="flex items-center">
             <label class="w-24 font-medium">고객의향</label>
-            <div class="flex space-x-4">
+            <div class="flex space-x-2">
               <label class="inline-flex items-center">
                 <input type="checkbox" name="intention" value="" checked class="mr-1">
                 <span>전체</span>
@@ -179,40 +179,41 @@
         <table id="mstrListTable" class="sortable min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
           <tr>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callDt">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callDt">
               상담일자
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="custNum">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="custNum">
               고객번호
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item01">만기일자</th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorCd">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item01">만기일자</th>
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorCd">
               상담사번호
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorName">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="counselorName">
               상담사명
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callId">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="callId">
               Call 번호
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
             </th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item02">결정구분</th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item03">고객의향</th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item04">리콜약속</th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item05">약속일시</th>
-            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="scoreValue">
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item02">결정구분</th>
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item03">고객의향</th>
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item04">리콜약속</th>
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item05">약속일시</th>
+            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" data-sort="scoreValue">
               연장가능성<br>Score
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
+                <br>(100)
             </th>
           </tr>
           </thead>
@@ -273,7 +274,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">고객의향</label>
-          <div class="flex space-x-4">
+          <div class="flex space-x-2">
             <label class="inline-flex items-center">
               <input type="checkbox" name="intention" value="" checked class="mr-1">
               <span>전체</span>
@@ -316,14 +317,18 @@
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
       <div class="grid grid-cols-2 gap-6">
         <!-- 콜수/고객수/상담수 차트 -->
-        <div class="w-full">
+        <div class="w-full" style="max-height: 262px;">
           <h3 class="text-lg font-medium text-gray-900 mb-4">상담 현황</h3>
-          <canvas id="callsChart"></canvas>
+          <div style="max-height: 218px;">
+            <canvas id="callsChart"></canvas>
+          </div>
         </div>
         <!-- 평균 스크립트 Score 차트 -->
-        <div class="w-full">
+        <div class="w-full" style="max-height: 262px;">
           <h3 class="text-lg font-medium text-gray-900 mb-4">결정구분별 상담고객 수, 만기고객 수</h3>
-          <canvas id="scoreChart"></canvas>
+          <div style="max-height: 218px;">
+            <canvas id="scoreChart"></canvas>
+          </div>
         </div>
         <!-- 문제소지 콜수 비중 차트 -->
         <%--<div class="w-full">

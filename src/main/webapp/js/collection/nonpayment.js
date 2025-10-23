@@ -5,17 +5,18 @@ let issueChart = null;
 let callsChartData = null;
 let scoreChartData = null;
 let problemChartData = null;
+let callsAllChartData = null;
+let scoreAllChartData = null;
+let problemAllChartData = null;
+let selectedRowIndex = -1; // 선택된 행의 인덱스 추적
 
 // 데이터 예시
 let sampleData = [];
 
 $(document).ready(function() {
     bindEvent();
-
     //화면 로드
     loadPage();
-    //차트 로드
-    loadChartData();
 });
 
 function openDetailPage(callId) {
@@ -31,10 +32,16 @@ function openDetailPage(callId) {
     );
 }
 
-function searchNonpayList(page) {
+function searchList(page) {
     var page = page || 1;
-
     var searchForm = $("#searchForm").serializeArray();
+
+    // 페이지 이동인지 새로운 검색인지 구분
+    const isNewSearch = page === 1;
+    const loadingMessage = isNewSearch ? '검색 중입니다' : `${page}페이지를 불러오는 중입니다`;
+
+    // 로딩 화면 표시
+    showLoading('table', loadingMessage);
 
     const data = searchForm;
     data.push({name: 'taskId', value: "TA0001"});
@@ -47,13 +54,37 @@ function searchNonpayList(page) {
         method: 'POST',
         data: data,
         success: function(response) {
-            const data = response.data;
-            loadMstrNonpayList(data);
-            updatePagination(data.currentPage, data.totalPages);
+            // 최소 500ms 로딩 표시 (너무 빠른 응답 시 깜빡임 방지)
+            setTimeout(() => {
+                try {
+                    const data = response.data;
+                    loadMstrSearchList(data);
+                    updatePagination(data.currentPage, data.totalPages);
+
+                } catch (error) {
+                    console.error('데이터 처리 중 오류:', error);
+                    showToastMessage('데이터 처리 중 오류가 발생했습니다.', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }, 500);
+
         },
         error: function(xhr, status, error) {
+            hideLoading();
             console.error('데이터 조회 실패:', error);
             alert('데이터 조회 중 오류가 발생했습니다.');
+
+            let errorMessage = '데이터 조회 중 오류가 발생했습니다.';
+            if (xhr.status === 500) {
+                errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+            } else if (xhr.status === 404) {
+                errorMessage = '요청한 페이지를 찾을 수 없습니다.';
+            } else if (xhr.status === 0) {
+                errorMessage = '네트워크 연결을 확인해주세요.';
+            }
+
+            showToastMessage(errorMessage, 'error');
         }
     })
 }
@@ -63,13 +94,13 @@ function loadPage() {
     //상담사 목록
     getCounselorList("TA0001");
     //목록조회
-    searchNonpayList();
+    searchList();
 }
 
-function loadMstrNonpayList(data) {
-    const mstrNonpayTable = $('#mstrNonpayTable');
+function loadMstrSearchList(data) {
+    const mstrListTable = $('#mstrListTable');
     const tdTemplate = "<td class=\"px-4 py-2 whitespace-nowrap\"></td>"
-    const trTemplate = "<tr onclick=\"\" class=\"hover:bg-gray-50 text-xs\"></tr>"
+    const trTemplate = "<tr onclick=\"\" class=\"hover:bg-gray-50 text-xs cursor-pointer\"></tr>"
     const totalCount = data.totalCount;
     var data = data.list;
 
@@ -77,26 +108,51 @@ function loadMstrNonpayList(data) {
     $("#listTab").find(".totalCount span").text(totalCount.toLocaleString());
 
     // 목록 초기화
-    $('#mstrNonpayTable tbody').empty();
+    $('#mstrListTable tbody').empty();
+    selectedRowIndex = -1; // 선택된 행 인덱스 초기화
 
     if(data == null || data == undefined) {
         console.log("error! 데이터가 없습니다.");
         return false;
     }
-    data.forEach(row => {
+    data.forEach((row, index) => {
         const $trTemplate = $(trTemplate);
-        $trTemplate.append($(tdTemplate).text(row.callDt));
-        $trTemplate.append($(tdTemplate).text(row.custNum));
-        $trTemplate.append($(tdTemplate).text(row.counselorCd));
-        $trTemplate.append($(tdTemplate).text(row.counselorName));
-        $trTemplate.append($(tdTemplate).addClass("cursor-pointer text-blue-600 hover:text-blue-800").on("click",function(){ openDetailPage(row.callId) }).text(row.callId));
-        $trTemplate.append($(tdTemplate).text(row.scoreValue));
-        $trTemplate.append($(tdTemplate).text(row.item05)); //오안내
-        $trTemplate.append($(tdTemplate).text(row.item07)); //금지문구
-        $trTemplate.append($(tdTemplate).text(row.item06)); //불법추심
-        $trTemplate.append($(tdTemplate).text(row.item08)); //납부의사
 
-        mstrNonpayTable.find("tbody").append($trTemplate);
+        // 행 클릭 이벤트 추가 (전체 행 클릭 가능)
+        $trTemplate.on("click", function(e) {
+            // 이전에 선택된 행의 스타일 제거
+            $('#mstrListTable tbody tr').removeClass('selected-row');
+
+            // 현재 행에 선택 스타일 적용
+            $(this).addClass('selected-row');
+            selectedRowIndex = index;
+
+            // Call 번호 셀을 클릭한 경우에만 상세 페이지 열기
+            if ($(e.target).hasClass('call-number-link') || $(e.target).closest('.call-number-cell').length > 0) {
+                openDetailPage(row.callId, row.taskId);
+            }
+        });
+
+        $trTemplate.append($(tdTemplate).text(row.callDt).addClass("text-center"));
+        $trTemplate.append($(tdTemplate).text(row.custNum).addClass("text-center"));
+        $trTemplate.append($(tdTemplate).text(row.counselorCd).addClass("text-center"));
+        $trTemplate.append($(tdTemplate).text(row.counselorName));
+        // Call 번호 컬럼에 특별한 클래스 추가
+        const callNumberCell = $(tdTemplate)
+            .addClass("text-center call-number-cell")
+            .append(
+                $('<span>')
+                    .addClass("call-number-link text-blue-600 hover:text-blue-800")
+                    .text(row.callId)
+            );
+        $trTemplate.append(callNumberCell);
+        $trTemplate.append($(tdTemplate).text(row.scoreValue).addClass("text-right"));
+        $trTemplate.append($(tdTemplate).text(row.item05).addClass("text-center")); //오안내
+        $trTemplate.append($(tdTemplate).text(row.item07).addClass("text-center")); //금지문구
+        $trTemplate.append($(tdTemplate).text(row.item06).addClass("text-center")); //불법추심
+        $trTemplate.append($(tdTemplate).text(row.item08).addClass("text-center")); //납부의사
+
+        mstrListTable.find("tbody").append($trTemplate);
     })
 }
 
@@ -105,10 +161,16 @@ function updatePagination(currentPage, totalPages) {
     const $pagination = $(".pagination");
     $pagination.empty();
 
+    const pagingIndex = Math.ceil(currentPage /10);
+    const pageMax = Math.min(pagingIndex*10,totalPages);
+    const pageMin = Math.max((pagingIndex-1)*10,1);
+
     // 이전 페이지 버튼
     if(currentPage > 1) {
+        let prePage = pageMin;
+
         $pagination.append(`
-            <a href="#" onclick="searchNonpayList(${currentPage - 1})" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <a href="#" onclick="searchList(${prePage})" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <span class="sr-only">이전</span>
                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -118,22 +180,29 @@ function updatePagination(currentPage, totalPages) {
     }
 
     // 페이지 번호들
-    for(let i = 1; i <= totalPages; i++) {
+
+    for(let i = (pagingIndex-1)*10+1; i <= pageMax; i++) {
         if(i === currentPage) {
             $pagination.append(`
                 <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">${i}</span>
             `);
         } else {
             $pagination.append(`
-                <a href="#" onclick="searchNonpayList(${i})" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">${i}</a>
+                <a href="#" onclick="searchList(${i})" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">${i}</a>
             `);
         }
     }
 
     // 다음 페이지 버튼
     if(currentPage < totalPages) {
+        let nextPage;
+        if(pageMax === totalPages) {
+            nextPage = pageMax;
+        } else {
+            nextPage = pageMax + 1;
+        }
         $pagination.append(`
-            <a href="#" onclick="searchNonpayList(${currentPage + 1})" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <a href="#" onclick="searchList(${nextPage})" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <span class="sr-only">다음</span>
                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
@@ -145,6 +214,8 @@ function updatePagination(currentPage, totalPages) {
 
 // 목록 다운로드 버튼 클릭 이벤트 핸들러
 function downloadList() {
+    showLoading('minimal', '엑셀 파일을 생성하는 중입니다');
+
     // 현재 검색 조건 가져오기
     const searchForm = $("#searchForm").serializeArray();
 
@@ -154,14 +225,12 @@ function downloadList() {
     data.push({name: 'sortOrder', value: JSON.stringify(sortOrder)});
     let headerNames = [];
     let headerKeys = [];
-    $("#mstrNonpayTable tr th").each(function() {
+    $("#mstrListTable tr th").each(function() {
         headerNames.push($(this).text().trim());
         headerKeys.push($(this).data("sort"));
     });
     data.push({name:"headerNames", value: headerNames});
     data.push({name:"headerKeys", value: headerKeys});
-
-    console.log(data);
 
     // AJAX 요청
     $.ajax({
@@ -172,6 +241,7 @@ function downloadList() {
             responseType: 'blob'
         },
         success: function(blob) {
+            hideLoading();
             // 파일 다운로드
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -183,10 +253,21 @@ function downloadList() {
             a.remove();
         },
         error: function(xhr, status, error) {
+            hideLoading();
             console.error('다운로드 실패:', error);
             alert('목록 다운로드 중 오류가 발생했습니다.');
         }
     });
+}
+
+// 선택된 행 유지 함수 (페이징이나 정렬 후에도 선택 상태 유지를 원할 경우)
+function restoreSelectedRow() {
+    if (selectedRowIndex >= 0) {
+        const $rows = $('#mstrListTable tbody tr');
+        if ($rows.length > selectedRowIndex) {
+            $rows.eq(selectedRowIndex).addClass('selected-row');
+        }
+    }
 }
 
 /**
@@ -203,6 +284,7 @@ function loadChartData() {
 }
 
 function selectCallChartData() {
+    showLoading('full');
 
     var searchForm = $("#statsSearchForm").serializeArray();
 
@@ -215,18 +297,40 @@ function selectCallChartData() {
         method: 'POST',
         data: data,
         success: function(response) {
-            console.log(response);
-            initChartData(response.callChartData,"TA0001","CALL");
-            initChartData(response.scoreChartData,"TA0001","SCORE");
-            initChartData(response.problemChartData,"TA0001","PROBLEM");
+            // 최소 500ms 로딩 표시 (너무 빠른 응답 시 깜빡임 방지)
+            setTimeout(() => {
+                try {
+                    console.log(response);
+                    initChartData(response.callChartData,"TA0001","CALL");
+                    initChartData(response.callAllChartData,"TA0001","CALLALL");
+                    initChartData(response.scoreChartData,"TA0001","SCORE");
+                    initChartData(response.scoreAllChartData,"TA0001","SCOREALL");
+                    initChartData(response.problemChartData,"TA0001","PROBLEM");
+                    initChartData(response.problemAllChartData,"TA0001","PROBLEMALL");
 
-            initSheetData(response);
+                    initSheetData(response);
 
-            initializeCharts();
+                    initializeCharts();
+                } finally {
+                    hideLoading();
+                }
+            }, 500);
+
         },
         error: function(xhr, status, error) {
+            hideLoading();
             console.error('데이터 조회 실패:', error);
-            alert('데이터 조회 중 오류가 발생했습니다.');
+
+            let errorMessage = '데이터 조회 중 오류가 발생했습니다.';
+            if (xhr.status === 500) {
+                errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+            } else if (xhr.status === 404) {
+                errorMessage = '요청한 페이지를 찾을 수 없습니다.';
+            } else if (xhr.status === 0) {
+                errorMessage = '네트워크 연결을 확인해주세요.';
+            }
+
+            showToastMessage(errorMessage, 'error');
         }
     })
 }
@@ -259,6 +363,12 @@ function initChartData(data,taskId,type) {
             scoreChartData = null;
         } else if(type == "PROBLEM") {
             problemChartData = null;
+        } else if(type == "CALLALL") {
+            callsAllChartData = null;
+        } else if(type == "SCOREALL") {
+            scoreAllChartData = null;
+        } else if(type == "PROBLEMALL") {
+            problemAllChartData = null;
         }
         return false;
     }
@@ -276,6 +386,12 @@ function initChartData(data,taskId,type) {
         scoreChartData = chartData;
     } else if(type == "PROBLEM") {
         problemChartData = chartData;
+    } else if(type == "CALLALL") {
+        callsAllChartData = chartData;
+    } else if(type == "SCOREALL") {
+        scoreAllChartData = chartData;
+    } else if(type == "PROBLEMALL") {
+        problemAllChartData = chartData;
     }
 
 }
@@ -290,21 +406,60 @@ function initializeCharts() {
         callNameList.push(row.name);
         callCntList.push(row.cnt);
     })
-    const callMaxDt = Math.max(...callCntList);
+    let callMaxDt = Math.max(...callCntList);
 
-    // 콜수/고객수/상담수 차트
-    callsChart = new Chart($('#callsChart'), {
-        type: 'bar',
-        data: {
-            labels: callNameList,
-            datasets: [{
+    let callDataSets = null;
+    if(callsAllChartData != null) {
+        const callAllNameList = [];
+        const callAllCntList = [];
+        callsAllChartData.forEach(row => {
+            callAllNameList.push(row.name);
+            callAllCntList.push(row.cnt);
+        });
+
+        callDataSets =
+        [
+            {
+                label: '전체',
+                data: callAllCntList,
+                backgroundColor: [
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(255, 99, 132, 0.7)'
+                ]
+            },
+            {
+                label: '상담사',
                 data: callCntList,
                 backgroundColor: [
                     'rgba(54, 162, 235, 0.7)',
                     'rgba(75, 192, 192, 0.7)',
                     'rgba(153, 102, 255, 0.7)'
                 ]
-            }]
+            }
+        ];
+
+        callMaxDt = Math.max(...callAllCntList);
+    } else {
+        callDataSets =
+        [
+            {
+                data: callCntList,
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ]
+            }
+        ]
+    }
+
+    // 콜수/고객수/상담수 차트
+    callsChart = new Chart($('#callsChart'), {
+        type: 'bar',
+        data: {
+            labels: callNameList,
+            datasets: callDataSets
         },
         options: {
             indexAxis: 'y',  // 가로 막대 차트
@@ -333,23 +488,65 @@ function initializeCharts() {
         scoreNameList.push(row.name);
         scoreCntList.push(row.avgScore);
     })
-    const scoreMaxDt = Math.max(...scoreCntList);
+    let scoreMaxDt = Math.max(...scoreCntList);
+
+    let scoreDataSets = null;
+    if(scoreAllChartData != null) {
+        const scoreAllNameList = [];
+        const scoreAllCntList = [];
+        scoreAllChartData.forEach(row => {
+            scoreAllNameList.push(row.name);
+            scoreAllCntList.push(row.avgScore);
+        });
+
+        scoreDataSets = [
+            {
+                label: '전체',
+                data: scoreAllCntList,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',   // 분홍색
+                    'rgba(255, 159, 64, 0.7)',   // 주황색
+                    'rgba(75, 192, 192, 0.7)',   // 청록색
+                    'rgba(153, 102, 255, 0.7)',  // 보라색
+                    'rgba(201, 203, 207, 0.7)'   // 회색
+
+                ]
+            },
+            {
+                label: '상담사',
+                data: scoreCntList,
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',   // 파란색
+                    'rgba(255, 205, 86, 0.7)',   // 노란색
+                    'rgba(46, 204, 113, 0.7)',   // 초록색
+                    'rgba(231, 76, 60, 0.7)',    // 빨간색
+                    'rgba(142, 68, 173, 0.7)'    // 진보라색
+                ]
+            }
+        ];
+
+        scoreMaxDt = Math.max(...scoreAllCntList);
+    } else {
+        scoreDataSets = [
+            {
+                data: scoreCntList,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',   // 분홍색
+                    'rgba(255, 159, 64, 0.7)',   // 주황색
+                    'rgba(75, 192, 192, 0.7)',   // 청록색
+                    'rgba(153, 102, 255, 0.7)',  // 보라색
+                    'rgba(201, 203, 207, 0.7)'   // 회색
+                ]
+            }
+        ];
+    }
 
     // 평균 스크립트 Score 차트
     scoreChart = new Chart($('#scoreChart'), {
         type: 'bar',
         data: {
             labels: scoreNameList,
-            datasets: [{
-                data: scoreCntList,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(255, 159, 64, 0.7)',
-                    'rgba(255, 205, 86, 0.7)',
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(54, 162, 235, 0.7)'
-                ]
-            }]
+            datasets: scoreDataSets
         },
         options: {
             responsive: true,
@@ -379,20 +576,57 @@ function initializeCharts() {
     })
     //const problemMaxDt = Math.max(...problemCntList);
 
+    let problemDataSets = null;
+    if(problemAllChartData != null) {
+        const problemAllNameList = [];
+        const problemAllCntList = [];
+        problemAllChartData.forEach(row => {
+            problemAllNameList.push(row.name);
+            problemAllCntList.push(row.ratio);
+        });
+
+        problemDataSets = [
+            {
+                label: '전체',
+                data: problemAllCntList,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',    // 분홍색
+                    'rgba(255, 159, 64, 0.7)',    // 주황색
+                    'rgba(75, 192, 192, 0.7)',    // 청록색
+                    'rgba(153, 102, 255, 0.7)'    // 보라색
+                ]
+            },
+            {
+                label: '상담사',
+                data: problemCntList,
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',    // 파란색
+                    'rgba(255, 206, 86, 0.7)',    // 노란색
+                    'rgba(46, 204, 113, 0.7)',    // 초록색
+                    'rgba(231, 76, 60, 0.7)'      // 빨간색
+                ]
+            }
+        ];
+    } else {
+        problemDataSets = [
+            {
+                data: problemCntList,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',    // 분홍색
+                    'rgba(255, 159, 64, 0.7)',    // 주황색
+                    'rgba(75, 192, 192, 0.7)',    // 청록색
+                    'rgba(153, 102, 255, 0.7)'    // 보라색
+                ]
+            }
+        ];
+    }
+
     // 문제소지 콜수 비중 차트
     issueChart = new Chart($('#issueChart'), {
         type: 'bar',
         data: {
             labels: problemNameList,
-            datasets: [{
-                data: problemCntList,
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(255, 206, 86, 0.7)',
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(153, 102, 255, 0.7)'
-                ]
-            }]
+            datasets: problemDataSets
         },
         options: {
             responsive: true,
@@ -420,7 +654,7 @@ function initializeCharts() {
 
 // 엑셀 다운로드 함수
 function downloadStats() {
-
+    showLoading('minimal', '엑셀 파일을 생성하는 중입니다');
     let headerNames = [];
     let headerKeys = [];
     $("#mstrStatsTable tr th").each(function() {
@@ -459,6 +693,7 @@ function downloadStats() {
             responseType: 'blob'
         },
         success: function(blob) {
+            hideLoading();
             // 파일 다운로드
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -470,6 +705,7 @@ function downloadStats() {
             a.remove();
         },
         error: function(xhr, status, error) {
+            hideLoading();
             console.error('다운로드 실패:', error);
             alert('통계 다운로드 중 오류가 발생했습니다.');
         }
@@ -478,13 +714,6 @@ function downloadStats() {
 
 }
 
-
-// 검색 조건 초기화 함수
-function resetSearchForm() {
-    $('#statsSearchForm')[0].reset();
-    destroyCharts();
-    loadChartData();
-}
 
 function initSheetData(response) {
     let callSheetData = response.callChartData;
@@ -587,72 +816,18 @@ function numberWithCommas(x) {
     return parts.join(".");
 }
 
-// AJAX 성공 시 데이터 렌더링
-function updateStatsDetail(response) {
-    renderStatsDetailGrid(response.data);
-}
-
-// 서버에 정렬된 데이터 요청
-function fetchSortedData() {
-    const params = {
-        ...getSearchParams(),
-        sort: JSON.stringify(sortOrder)
-    };
-
-    $.ajax({
-        url: '/api/nonpayment/list',
-        method: 'GET',
-        data: params,
-        success: function(response) {
-            updateTableData(response);
-        },
-        error: function(xhr, status, error) {
-            console.error('데이터 조회 실패:', error);
-            alert('데이터 조회 중 오류가 발생했습니다.');
-        }
-    });
-}
-
-
-// 테이블 데이터 업데이트
-function updateTableData(data) {
-    const tbody = $('table tbody');
-    tbody.empty();
-
-    data.forEach(item => {
-        const tr = $('<tr>').addClass('hover:bg-gray-50 cursor-pointer text-xs');
-
-        // 각 컬럼 데이터 추가
-        tr.append(`
-                <td class="px-4 py-2 whitespace-nowrap">${item.consultDate}</td>
-                <td class="px-4 py-2 whitespace-nowrap">${item.customerNo}</td>
-                <td class="px-4 py-2 whitespace-nowrap">${item.counselorNo}</td>
-                <td class="px-4 py-2 whitespace-nowrap">${item.counselorName}</td>
-                <td class="px-4 py-2 whitespace-nowrap text-blue-600">${item.callNo}</td>
-                <td class="px-4 py-2 whitespace-nowrap">${item.score}</td>
-                <td class="px-4 py-2 whitespace-nowrap">${item.wrongGuide}</td>
-                <td class="px-4 py-2 whitespace-nowrap">${item.banned}</td>
-                <td class="px-4 py-2 whitespace-nowrap">${item.illegal}</td>
-                <td class="px-4 py-2 whitespace-nowrap">${item.paymentWill}</td>
-            `);
-
-        tbody.append(tr);
-    });
-}
-
-// 검색 조건 파라미터 가져오기
-function getSearchParams() {
-    return $('#searchForm').serializeArray().reduce((obj, item) => {
-        obj[item.name] = item.value;
-        return obj;
-    }, {});
-}
-
-
 
 // 이벤트 바인딩
 function bindEvent() {
     commonBindEvent();
+
+    $('.tab-link').click(function(e) {
+        const target = $(this).data('tab');
+
+        if (target === 'stats') {
+            loadChartData();
+        }
+    })
 
     // 통계 검색 폼 제출
     $('#statsSearchForm').on('submit', function(e) {
@@ -669,48 +844,46 @@ function bindEvent() {
             //다중 정렬 추가
             handleMultiSort(column);
             updateSortUI();
-            searchNonpayList(1);
+            searchList(1);
         }
-        /*
-        if(e.shiftKey) {
-
-        } else {
-            // 일반 클릭: 단일 정렬
-            sortOrder = [{
-                column: column,
-                direction: 'asc'
-            }];
-            updateSortUI();
-        }
-        */
-
-        // 정렬 실행
-        //fetchSortedData();
     })
 
 
     // 정렬 초기화 버튼 이벤트
     $('#resetSortBtn').on('click', function() {
+        // 버튼 로딩 상태 표시
+        const $btn = $(this);
+        const originalHtml = $btn.html();
+
+        $btn.prop('disabled', true).html(`
+            <svg class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            정렬 초기화 중...
+        `);
+
         resetSort();
 
+        // 정렬 초기화 후 검색
         // 시각적 피드백을 위한 애니메이션 효과
-        $(this).find("svg").addClass('animate-spin');
         setTimeout(() => {
-            $(this).find("svg").removeClass('animate-spin');
+            searchList(1);
+            $btn.prop('disabled', false).html(originalHtml);
+            showToastMessage('정렬이 초기화되었습니다.', 'info');
         }, 500);
 
-        searchNonpayList();
+        searchList(1);
     });
 
     //페이지 사이즈 변경 이벤트
     $("#listTab").find("select[name=pageSize]").on("change", function(e) {
-        searchNonpayList();
+        searchList(1);
     });
 
     //미납안내 Call 리스트 목록 검색버튼
     $("#searchForm").on("submit",function(e){
         e.preventDefault();
-        searchNonpayList();
+        searchList(1);
     });
 
     $('.download-list-btn').on('click', downloadList);

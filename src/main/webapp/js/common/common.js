@@ -1,3 +1,5 @@
+// 로딩 관련 전역 변수
+let loadingTimeout;
 let sortOrder = [];
 
 // 다중 정렬 처리
@@ -128,4 +130,169 @@ function commonBindEvent() {
     });
 }
 
+function checkboxToggleAll(masterCheckbox, targetName, tagId) {
+    if(tagId) {
+        const isChecked = $(masterCheckbox).is(':checked');
+        $(`#${tagId} input[name='${targetName}']`).prop('checked', isChecked);
+    } else {
+        const isChecked = $(masterCheckbox).is(':checked');
+        $(`input[name='${targetName}']`).prop('checked', isChecked);
+    }
+}
 
+/**
+* 로딩 화면 표시 함수
+* @param {string} type - 로딩 타입 ('full', 'table', 'minimal')
+* @param {string} message - 로딩 메시지
+*/
+function showLoading(type = 'table', message = '데이터를 불러오는 중입니다') {
+    hideLoading(); // 기존 로딩 제거
+
+    let loadingHtml = '';
+
+    if (type === 'full') {
+        // 전체 화면 로딩
+        loadingHtml = `
+            <div id="loadingOverlay" class="loading-overlay">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <div class="loading-text">${message}<span class="loading-dots"></span></div>
+                </div>
+            </div>
+        `;
+        $('body').append(loadingHtml);
+    } else if (type === 'table') {
+        // 테이블 영역만 로딩
+        loadingHtml = `
+            <div id="tableLoadingOverlay" class="table-loading-overlay">
+                <div class="text-center">
+                    <div class="dots-loader">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <div class="loading-text">${message}<span class="loading-dots"></span></div>
+                </div>
+            </div>
+        `;
+        $('.table-container > .overflow-x-auto').css('position', 'relative').append(loadingHtml);
+    } else if (type === 'minimal') {
+        // 미니멀 로딩 (프로그레스 바)
+        loadingHtml = `
+            <div id="minimalLoadingOverlay" class="loading-overlay">
+                <div class="loading-content">
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+                    <div class="loading-text">${message}</div>
+                </div>
+            </div>
+        `;
+        $('body').append(loadingHtml);
+    }
+
+    // 30초 후 자동으로 로딩 제거 (타임아웃 방지)
+    loadingTimeout = setTimeout(() => {
+        hideLoading();
+        console.warn('로딩이 30초 이상 지속되어 자동으로 해제되었습니다.');
+    }, 30000);
+}
+
+/**
+ * 로딩 화면 숨김 함수
+ */
+function hideLoading() {
+    if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+        loadingTimeout = null;
+    }
+
+    $('#loadingOverlay').remove();
+    $('#tableLoadingOverlay').remove();
+    $('#minimalLoadingOverlay').remove();
+}
+
+
+/**
+ * 토스트 메시지 표시 함수
+ * @param {string} message - 메시지 내용
+ * @param {string} type - 메시지 타입 ('success', 'error', 'info')
+ */
+function showToastMessage(message, type = 'info') {
+    const toastId = 'toast-' + Date.now();
+    const bgColor = type === 'success' ? 'bg-green-500' :
+        type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+
+    const toastHtml = `
+        <div id="${toastId}" class="fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300">
+            <div class="flex items-center">
+                <span>${message}</span>
+                <button onclick="$('#${toastId}').remove()" class="ml-4 text-white hover:text-gray-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `;
+
+    $('body').append(toastHtml);
+
+    // 애니메이션으로 나타내기
+    setTimeout(() => {
+        $(`#${toastId}`).removeClass('translate-x-full');
+    }, 100);
+
+    // 3초 후 자동 제거
+    setTimeout(() => {
+        $(`#${toastId}`).addClass('translate-x-full');
+        setTimeout(() => {
+            $(`#${toastId}`).remove();
+        }, 300);
+    }, 3000);
+}
+
+// 툴팁 표시 함수
+function showTooltip(element, text) {
+    // 기존 툴팁 제거
+    hideTooltip();
+
+    const tooltip = $('<div class="custom-tooltip">' +
+        '<div class="tooltip-content">' + text + '</div>' +
+        '<div class="tooltip-arrow"></div>' +
+        '</div>');
+
+    $('body').append(tooltip);
+
+    const rect = element.getBoundingClientRect();
+    const tooltipWidth = tooltip.outerWidth();
+    const tooltipHeight = tooltip.outerHeight();
+
+    // 툴팁 위치 계산
+    let top = rect.top + window.scrollY - tooltipHeight - 10;
+    let left = rect.left + window.scrollX + (rect.width / 2) - (tooltipWidth / 2);
+
+    // 화면 경계 체크 및 조정
+    if (left < 10) {
+        left = 10;
+    } else if (left + tooltipWidth > window.innerWidth - 10) {
+        left = window.innerWidth - tooltipWidth - 10;
+    }
+
+    if (top < 10) {
+        // 위쪽 공간이 부족하면 아래쪽에 표시
+        top = rect.bottom + window.scrollY + 10;
+        tooltip.find('.tooltip-arrow').addClass('arrow-top');
+    }
+
+    tooltip.css({
+        top: top + 'px',
+        left: left + 'px'
+    }).fadeIn(150);
+}
+
+// 툴팁 숨김 함수
+function hideTooltip() {
+    $('.custom-tooltip').remove();
+}
