@@ -127,7 +127,9 @@
     <!-- Common.selectMstrScore -->
         SELECT B.SCORE_ID AS "scoreId"
             , B.NAME AS "scoreName"
-            , IFNULL(A.SCORE_VALUE,0) AS "scoreValue"
+            , CASE B.SCORE_ID WHEN 'S0006' THEN (-1)*IFNULL(A.SCORE_VALUE,0)
+                WHEN 'S0016' THEN (-1)*IFNULL(A.SCORE_VALUE,0)
+                ELSE IFNULL(A.SCORE_VALUE,0) END AS "scoreValue"
         FROM MSTR_EVAL_SCORE_CONTENT B
         LEFT JOIN MSTR_ANALYSIS_SCORE A
         ON A.SCORE_ID = B.SCORE_ID

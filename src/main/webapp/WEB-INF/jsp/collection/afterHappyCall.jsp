@@ -25,13 +25,13 @@
         <div class="grid grid-cols-3 gap-4">
           <!-- 고객번호 입력 -->
           <div class="flex items-center">
-            <label class="w-24 font-medium">고객번호</label>
+            <label class="w-48 font-medium">고객번호</label>
             <input type="text" name="custNum" class="bg-white border border-gray-300 flex-1 border rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
           </div>
 
           <!-- 상담사 선택 -->
           <div class="flex items-center">
-            <label class="w-24 font-medium">상담사</label>
+            <label class="w-48 font-medium">상담사</label>
             <select name="counselor" class="bg-white border border-gray-300 flex-1 border rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
               <option value="">선택하세요</option>
             </select>
@@ -39,7 +39,7 @@
 
           <!-- 기간 설정 -->
           <div class="flex items-center">
-            <label class="w-24 font-medium">기간설정</label>
+            <label class="w-48 font-medium">기간설정</label>
             <input type="date" name="startDate" class="bg-white border border-gray-300 border rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
             <span class="mx-2">~</span>
             <input type="date" name="endDate" class="bg-white border border-gray-300 border rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
@@ -51,7 +51,7 @@
           <div class="grid grid-cols-3 gap-4">
             <!-- 상품 선택 -->
             <div class="flex items-center col-span-1">
-              <label class="w-24 font-medium">상품</label>
+              <label class="w-48 font-medium">상품</label>
               <select name="product" class="bg-white border border-gray-300 flex-1 border rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
                 <option value="">전체</option>
               </select>
@@ -59,7 +59,7 @@
 
             <!-- 수수료/이면약정 -->
             <div class="flex items-center">
-              <label class="w-24 font-medium">수수료/이면약정</label>
+              <label class="w-48 font-medium">수수료/이면약정</label>
               <div class="flex space-x-4">
                 <label class="inline-flex items-center">
                   <input type="radio" name="csAgmt" value="" class="mr-1" checked>
@@ -78,7 +78,7 @@
 
             <!-- 계약외지원약속 -->
             <div class="flex items-center">
-              <label class="w-24 font-medium">계약외지원약속</label>
+              <label class="w-48 font-medium">계약외지원약속</label>
               <div class="flex space-x-4">
                 <label class="inline-flex items-center">
                   <input type="radio" name="ncSupport" value="" class="mr-1" checked>
