@@ -343,8 +343,8 @@
                   </when>
                   <when test="taskId[0] == 'TA0002'">
                       , IFNULL(MARI1.RESULT_VALUE, 'N')     AS "item01"
-                      , IFNULL(STR_TO_DATE(MARI2.RESULT_VALUE,'%Y%m%d%H%i'),CONCAT(SUBSTRING(MARI2.RESULT_VALUE,1,4),'-',SUBSTRING(MARI2.RESULT_VALUE,5,2))) AS "item02"
-                      /*, DATE_FORMAT(STR_TO_DATE(MARI2.RESULT_VALUE,'%Y-%m-%d'),'%Y-%m-%d') AS "item02"*/
+                      /* , IFNULL(STR_TO_DATE(MARI2.RESULT_VALUE,'%Y%m%d%H%i'),CONCAT(SUBSTRING(MARI2.RESULT_VALUE,1,4),'-',SUBSTRING(MARI2.RESULT_VALUE,5,2))) AS "item02" */
+                      , DATE_FORMAT(STR_TO_DATE(MARI2.RESULT_VALUE,'%Y-%m-%d'),'%Y-%m-%d') AS "item02"
                       , IFNULL(MARI3.RESULT_VALUE, 'N')     AS "item03"
                       , CASE WHEN MARI4.result_value_a = 'Y' THEN '성사'
                           WHEN MARI4.result_value_b = 'Y' THEN '거절'

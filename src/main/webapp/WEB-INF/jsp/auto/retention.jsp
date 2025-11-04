@@ -213,7 +213,7 @@
               연장가능성<br>Score
               <span class="sort-icon" data-direction="none"></span>
               <span class="sort-order"></span>
-                <br>(100)
+                <br>(120)
             </th>
           </tr>
           </thead>

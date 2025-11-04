@@ -326,10 +326,17 @@ function handleContentClick(conText) {
     }
 
     const $el = $("body #conversationBox p:contains('" + conText + "')").first();
+    const $el2 = $("body #conversationBox p:contains('" + conText.substring(0,10) + "')").first();
 
     if($el.length) {
         $("body #conversationBox p span").removeClass("bg-yellow-200");
         $el.html($el.text().replaceAll(conText,"<span class='bg-yellow-200'>"+conText+"</span>"))
         $el.get(0).scrollIntoView({ behavior: "smooth", block: "center" });
+    } else if($el2.length) {
+        $("body #conversationBox p span").removeClass("bg-yellow-200");
+        $el2.html($el2.text().replaceAll(conText.substring(0,10),"<span class='bg-yellow-200'>"+conText.substring(0,10)+"</span>"))
+        $el2.get(0).scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+        $("body #conversationBox p").first().get(0).scrollIntoView({ behavior: "smooth", block: "center" });
     }
 }
