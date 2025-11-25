@@ -36,10 +36,10 @@
                 AND IFNULL(MARI8.RESULT_VALUE,'N') = #{paymentWill}
             </if>
             <if test="csAgmt != null and csAgmt != ''">
-                AND IFNULL(MARI1.RESULT_VALUE,'N') = #{csAgmt}
+                AND MARI1.RESULT_VALUE = #{csAgmt}
             </if>
             <if test="ncSupport != null and ncSupport != ''">
-                AND IFNULL(MARI2.RESULT_VALUE,'N') = #{ncSupport}
+                AND MARI2.RESULT_VALUE = #{ncSupport}
             </if>
             <if test="counselor != null and counselor != ''">
                 AND MC.COUNSELOR_CD = #{counselor}
@@ -247,7 +247,6 @@
                 SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
                 WHERE ITEM_ID = 'I0034'
                 AND CONTENT_ID = 'C0097'
-                AND RESULT_VALUE = 'Y'
                 GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
                 ) MARI1
                 ON MC.CALL_ID = MARI1.CALL_ID
@@ -255,7 +254,6 @@
                 SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
                 WHERE ITEM_ID = 'I0043'
                 AND CONTENT_ID = 'C0117'
-                AND RESULT_VALUE = 'Y'
                 GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
                 ) MARI2
                 ON MC.CALL_ID = MARI2.CALL_ID
@@ -320,13 +318,7 @@
     <!-- call 목록 정보 조회 -->
     <select id="selectMstrNonpayList" parameterType="hashmap" resultType="hashmap">
         <!-- Collection.selectMstrNonpayList -->
-        SELECT * FROM (
-            SELECT
-                @ROWNUM := @ROWNUM + 1 AS RNUM,
-                A.*
-            FROM (
-
-            SELECT DATE_FORMAT(MC.CALL_DT,'%Y-%m-%d') AS "callDt"
+               SELECT DATE_FORMAT(MC.CALL_DT,'%Y-%m-%d') AS "callDt"
                     , MC.CUST_NUM AS "custNum"
                     , MC.COUNSELOR_CD AS "counselorCd"
                     , MCS.NAME AS "counselorName"
@@ -382,8 +374,8 @@
                         , DATE_FORMAT(STR_TO_DATE(MARI5.RESULT_VALUE,'%Y-%m-%d'),'%Y-%m-%d') AS "item05"
                   </when>
                   <otherwise>
-                      , IFNULL(MARI1.RESULT_VALUE,'N') AS "item01"
-                      , IFNULL(MARI2.RESULT_VALUE,'N') AS "item02"
+                      , MARI1.RESULT_VALUE AS "item01"
+                      , MARI2.RESULT_VALUE AS "item02"
                   </otherwise>
               </choose>
                 FROM MSTR_CALL MC
@@ -413,9 +405,7 @@
                     ORDER BY callDt desc
                 </otherwise>
             </choose>
-            ) A, (SELECT @ROWNUM := 0) R
-        ) B
-        WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+            LIMIT ${pageSize} OFFSET ${offset}
 
     </select>
 

@@ -30,12 +30,13 @@ public class CollectionServiceImpl  implements CollectionService {
         // 페이징 처리
         int pageSize = Integer.parseInt(String.valueOf(params.getOrDefault("pageSize", "10")));
         int currentPage = Integer.parseInt(String.valueOf(params.getOrDefault("currentPage", "1")));
-        int startRow = (currentPage - 1) * pageSize + 1;
-        int endRow = currentPage * pageSize;
+//        int startRow = (currentPage - 1) * pageSize + 1;
+//        int endRow = currentPage * pageSize;
         String[] taskId = (String[])params.get("taskId");
 
-        params.put("startRow", startRow);
-        params.put("endRow", endRow);
+        params.put("offset", (currentPage - 1) * pageSize);
+//        params.put("startRow", startRow);
+//        params.put("endRow", endRow);
 
         // 데이터 조회
         List<Map<String, Object>> list = sqlSession.selectList("Collection.selectMstrNonpayList", params);
