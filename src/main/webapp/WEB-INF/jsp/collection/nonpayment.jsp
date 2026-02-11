@@ -46,7 +46,7 @@
                 <div class="search-option-group">
                     <div class="grid grid-cols-5 gap-4">
                         <!-- 오안내 -->
-                        <div class="flex items-center">
+                        <%--<div class="flex items-center">
                             <label class="w-24 font-medium">오안내</label>
                             <div class="flex space-x-4">
                                 <label class="inline-flex items-center">
@@ -62,7 +62,7 @@
                                     <span class="radio-text">N</span>
                                 </label>
                             </div>
-                        </div>
+                        </div>--%>
 
                         <!-- 금지문구 -->
                         <div class="flex items-center">
@@ -197,9 +197,9 @@
                             <span class="sort-order"></span>
                             <br>(20)
                         </th>
-                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item05">
+                        <%--<th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item05">
                             오안내<br>(-5)
-                        </th>
+                        </th>--%>
                         <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="item07">
                             금지문구
                         </th>

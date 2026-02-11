@@ -91,19 +91,16 @@ function searchList(Page) {
         data: data,
         traditional: false,
         success: function(response) {
-            // 최소 500ms 로딩 표시 (너무 빠른 응답 시 깜빡임 방지)
-            setTimeout(() => {
-                try {
-                    const data = response.data;
-                    loadMstrSearchList(data);
-                    updatePagination(data.currentPage, data.totalPages);
-                } catch (error) {
-                    console.error('데이터 처리 중 오류:', error);
-                    showToastMessage('데이터 처리 중 오류가 발생했습니다.', 'error');
-                } finally {
-                    hideLoading();
-                }
-            }, 500);
+            try {
+                const data = response.data;
+                loadMstrSearchList(data);
+                updatePagination(data.currentPage, data.totalPages);
+            } catch (error) {
+                console.error('데이터 처리 중 오류:', error);
+                showToastMessage('데이터 처리 중 오류가 발생했습니다.', 'error');
+            } finally {
+                hideLoading();
+            }
         },
         error: function(xhr, status, error) {
             hideLoading();
@@ -124,62 +121,40 @@ function searchList(Page) {
 }
 
 function loadMstrSearchList(data) {
-    const mstrListTable = $('#mstrListTable');
-    const tdTemplate = "<td class=\"px-4 py-2 whitespace-nowrap\"></td>"
-    const trTemplate = "<tr onclick=\"\" class=\"hover:bg-gray-50 text-xs\"></tr>"
     const totalCount = data.totalCount;
-    var data = data.list;
+    var list = data.list;
 
     // 총 건수
     $("#listTab").find(".totalCount span").text(totalCount.toLocaleString());
 
     // 목록 초기화
-    $('#mstrListTable tbody').empty();
-    selectedRowIndex = -1; // 선택된 행 인덱스 초기화
+    const tbody = document.querySelector('#mstrListTable tbody');
+    tbody.innerHTML = '';
+    selectedRowIndex = -1;
 
-    if(data == null || data == undefined) {
+    if(list == null || list == undefined) {
         console.log("error! 데이터가 없습니다.");
         return false;
     }
-    data.forEach((row, index) => {
-        const $trTemplate = $(trTemplate);
 
-        // 행 클릭 이벤트 추가 (전체 행 클릭 가능)
-        $trTemplate.on("click", function(e) {
-            // 이전에 선택된 행의 스타일 제거
-            $('#mstrListTable tbody tr').removeClass('selected-row');
-
-            // 현재 행에 선택 스타일 적용
-            $(this).addClass('selected-row');
-            selectedRowIndex = index;
-
-            // Call 번호 셀을 클릭한 경우에만 상세 페이지 열기
-            if ($(e.target).hasClass('call-number-link') || $(e.target).closest('.call-number-cell').length > 0) {
-                openDetailPage(row.callId, row.taskId);
-            }
-        });
-
-        $trTemplate.append($(tdTemplate).text(row.callDt).addClass("text-center"));
-        $trTemplate.append($(tdTemplate).text(row.custNum).addClass("text-center"));
-        $trTemplate.append($(tdTemplate).text(row.counselorCd).addClass("text-center"));
-        $trTemplate.append($(tdTemplate).text(row.counselorName));
-        // $trTemplate.append($(tdTemplate).addClass("cursor-pointer text-blue-600 hover:text-blue-800").on("click",function(){ openDetailPage(row.callId,row.taskId) }).text(row.callId));
-        // Call 번호 컬럼에 특별한 클래스 추가
-        const callNumberCell = $(tdTemplate)
-            .addClass("text-center call-number-cell")
-            .append(
-                $('<span>')
-                    .addClass("call-number-link text-blue-600 hover:text-blue-800")
-                    .text(row.callId)
-            );
-        $trTemplate.append(callNumberCell);
-        $trTemplate.append($(tdTemplate).text(row.taskName));
-        $trTemplate.append($(tdTemplate).text(row.scoreValue).addClass("text-right"));
-        $trTemplate.append($(tdTemplate).text(row.item01).addClass("text-center")); //수수료/이면약정
-        $trTemplate.append($(tdTemplate).text(row.item02).addClass("text-center")); //계약외지원약속
-
-        mstrListTable.find("tbody").append($trTemplate);
-    })
+    // innerHTML 일괄 삽입 (DOM reflow 1회)
+    let html = '';
+    list.forEach((row, index) => {
+        html += '<tr class="hover:bg-gray-50 text-xs cursor-pointer" data-index="' + index + '" data-call-id="' + escapeHtml(row.callId) + '" data-task-id="' + escapeHtml(row.taskId) + '">'
+            + '<td class="px-4 py-2 whitespace-nowrap text-center">' + escapeHtml(row.callDt) + '</td>'
+            + '<td class="px-4 py-2 whitespace-nowrap text-center">' + escapeHtml(row.custNum) + '</td>'
+            + '<td class="px-4 py-2 whitespace-nowrap text-center">' + escapeHtml(row.counselorCd) + '</td>'
+            + '<td class="px-4 py-2 whitespace-nowrap">' + escapeHtml(row.counselorName) + '</td>'
+            + '<td class="px-4 py-2 whitespace-nowrap text-center call-number-cell">'
+            +   '<span class="call-number-link text-blue-600 hover:text-blue-800">' + escapeHtml(row.callId) + '</span>'
+            + '</td>'
+            + '<td class="px-4 py-2 whitespace-nowrap">' + escapeHtml(row.taskName) + '</td>'
+            + '<td class="px-4 py-2 whitespace-nowrap text-right">' + escapeHtml(row.scoreValue) + '</td>'
+            + '<td class="px-4 py-2 whitespace-nowrap text-center">' + escapeHtml(row.item01) + '</td>'
+            + '<td class="px-4 py-2 whitespace-nowrap text-center">' + escapeHtml(row.item02) + '</td>'
+            + '</tr>';
+    });
+    tbody.innerHTML = html;
 }
 
 // 페이징 업데이트
@@ -290,33 +265,30 @@ function selectCallChartData() {
         method: 'POST',
         data: data,
         success: function(response) {
-            // 최소 500ms 로딩 표시 (너무 빠른 응답 시 깜빡임 방지)
-            setTimeout(() => {
-                try {
-                    const callData = sumCallData(response.callChartData);
-                    response.callChartData = callData;
-                    const callAllData = sumCallData(response.callAllChartData);
-                    response.callAllChartData = callAllData;
+            try {
+                const callData = sumCallData(response.callChartData);
+                response.callChartData = callData;
+                const callAllData = sumCallData(response.callAllChartData);
+                response.callAllChartData = callAllData;
 
-                    const problemData = sumProblemData(response.problemChartData,callData);
-                    response.problemChartData = problemData;
-                    const problemAllData = sumProblemData(response.problemAllChartData,callAllData);
-                    response.problemAllChartData = problemAllData;
+                const problemData = sumProblemData(response.problemChartData,callData);
+                response.problemChartData = problemData;
+                const problemAllData = sumProblemData(response.problemAllChartData,callAllData);
+                response.problemAllChartData = problemAllData;
 
-                    initChartData(callData,"","CALL");
-                    initChartData(callAllData,"","CALLALL");
-                    initChartData(response.scoreChartData,"","SCORE");
-                    initChartData(response.scoreAllChartData,"","SCOREALL");
-                    initChartData(problemData,"","PROBLEM");
-                    initChartData(problemAllData,"","PROBLEMALL");
+                initChartData(callData,"","CALL");
+                initChartData(callAllData,"","CALLALL");
+                initChartData(response.scoreChartData,"","SCORE");
+                initChartData(response.scoreAllChartData,"","SCOREALL");
+                initChartData(problemData,"","PROBLEM");
+                initChartData(problemAllData,"","PROBLEMALL");
 
-                    initSheetData(response);
+                initSheetData(response);
 
-                    initializeCharts();
-                } finally {
-                    hideLoading();
-                }
-            }, 500);
+                initializeCharts();
+            } finally {
+                hideLoading();
+            }
 
         },
         error: function(xhr, status, error) {
@@ -945,27 +917,9 @@ function bindEvent() {
 
     // 정렬 초기화 버튼 이벤트
     $('#resetSortBtn').on('click', function() {
-        // 버튼 로딩 상태 표시
-        const $btn = $(this);
-        const originalHtml = $btn.html();
-
-        $btn.prop('disabled', true).html(`
-            <svg class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            정렬 초기화 중...
-        `);
         resetSort();
-
-        // 정렬 초기화 후 검색
-        // 시각적 피드백을 위한 애니메이션 효과
-        setTimeout(() => {
-            searchList(1);
-            $btn.prop('disabled', false).html(originalHtml);
-            showToastMessage('정렬이 초기화되었습니다.', 'info');
-        }, 500);
-
         searchList(1);
+        showToastMessage('정렬이 초기화되었습니다.', 'info');
     });
 
     //페이지 사이즈 변경 이벤트
@@ -983,6 +937,17 @@ function bindEvent() {
     $('#statsSearchForm').submit(function(e) {
         e.preventDefault();
         loadChartData();
+    });
+
+    // 이벤트 위임: 테이블 행 클릭
+    $('#mstrListTable tbody').on('click', 'tr', function(e) {
+        $('#mstrListTable tbody tr.selected-row').removeClass('selected-row');
+        $(this).addClass('selected-row');
+        selectedRowIndex = parseInt($(this).data('index'));
+
+        if ($(e.target).hasClass('call-number-link') || $(e.target).closest('.call-number-cell').length > 0) {
+            openDetailPage($(this).data('call-id'), $(this).data('task-id'));
+        }
     });
 
     $('.download-list-btn').on('click', downloadList);

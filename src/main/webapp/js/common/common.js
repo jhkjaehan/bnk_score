@@ -296,3 +296,9 @@ function showTooltip(element, text) {
 function hideTooltip() {
     $('.custom-tooltip').remove();
 }
+
+// HTML 이스케이프 함수 (innerHTML 사용 시 XSS 방지)
+function escapeHtml(val) {
+    if (val == null) return '';
+    return String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}

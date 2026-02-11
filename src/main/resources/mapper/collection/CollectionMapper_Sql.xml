@@ -23,9 +23,9 @@
                 AND DATE_FORMAT(MC.CALL_DT,'%Y-%m-%d') <![CDATA[ <= ]]> #{endDate}
             </if>
 
-            <if test="wrongGuide != null and wrongGuide != ''">
+            <!--<if test="wrongGuide != null and wrongGuide != ''">
                 AND IFNULL(MARI5.RESULT_VALUE,'N') = #{wrongGuide}
-            </if>
+            </if>-->
             <if test="banned != null and banned != ''">
                 AND IFNULL(MARI7.RESULT_VALUE,'N') = #{banned}
             </if>
@@ -130,13 +130,13 @@
     <sql id="searchListJoin">
         <choose>
             <when test="taskId[0] == 'TA0001'">
-                LEFT JOIN (
+                /*LEFT JOIN (
                 SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
                 WHERE ITEM_ID = 'I0005'
                 AND RESULT_VALUE = 'Y'
                 GROUP BY TASK_ID, CALL_ID, RESULT_VALUE
                 ) MARI5
-                ON MC.CALL_ID = MARI5.CALL_ID
+                ON MC.CALL_ID = MARI5.CALL_ID*/
                 LEFT JOIN (
                 SELECT TASK_ID, CALL_ID, RESULT_VALUE FROM MSTR_ANALYSIS_RESULT
                 WHERE ITEM_ID = 'I0006'
@@ -328,7 +328,7 @@
                     , MAS.SCORE_VALUE AS "scoreValue"
               <choose>
                   <when test="taskId[0] == 'TA0001'">
-                      , IFNULL(MARI5.RESULT_VALUE,'N') AS "item05"
+                      /*, IFNULL(MARI5.RESULT_VALUE,'N') AS "item05"*/
                       , IFNULL(MARI6.RESULT_VALUE,'N') AS "item06"
                       , IFNULL(MARI7.RESULT_VALUE,'N') AS "item07"
                       , IFNULL(MARI8.RESULT_VALUE,'N') AS "item08"
@@ -410,51 +410,13 @@
     </select>
 
 
-    <!-- 전체 건수 조회 -->
-    <select id="selectMstrNonpayListCount" parameterType="hashmap" resultType="int">
-        SELECT COUNT(*)
-        FROM MSTR_CALL MC
-        LEFT JOIN MSTR_COUNSELOR MCS
-        ON MC.COUNSELOR_CD = MCS.COUNSELOR_CD
-        LEFT JOIN V_MSTR_CALL_TASK VMC
-        ON MC.CALL_ID = VMC.CALL_ID
-        LEFT JOIN (
-        SELECT CALL_ID, TASK_ID, SCORE_ID, SCORE_VALUE FROM MSTR_ANALYSIS_SCORE
-        WHERE SCORE_ID IN
-        (
-        SELECT MIN(SCORE_ID) FROM MSTR_EVAL_SCORE_CONTENT
-        GROUP BY TASK_ID
-        )
-        ) MAS
-        ON MC.CALL_ID = MAS.CALL_ID
-        <include refid="searchListJoin"/>
-        <include refid="nonpayListWhere"/>
-    </select>
-
-    <!-- 상담 고객 수 조회 -->
-    <select id="selectMstrCustomerListCount" parameterType="hashmap" resultType="int">
-        SELECT COUNT(distinct MC.CUST_NUM)
-        FROM MSTR_CALL MC
-        LEFT JOIN MSTR_COUNSELOR MCS
-        ON MC.COUNSELOR_CD = MCS.COUNSELOR_CD
-        LEFT JOIN V_MSTR_CALL_TASK VMC
-        ON MC.CALL_ID = VMC.CALL_ID
-        LEFT JOIN (
-        SELECT CALL_ID, TASK_ID, SCORE_ID, SCORE_VALUE FROM MSTR_ANALYSIS_SCORE
-        WHERE SCORE_ID IN
-        (
-        SELECT MIN(SCORE_ID) FROM MSTR_EVAL_SCORE_CONTENT
-        GROUP BY TASK_ID
-        )
-        ) MAS
-        ON MC.CALL_ID = MAS.CALL_ID
-        <include refid="searchListJoin"/>
-        <include refid="nonpayListWhere"/>
-    </select>
-
-    <!-- 만기 고객 수 조회 -->
-    <select id="selectMstrExtCustomerListCount" parameterType="hashmap" resultType="int">
-        SELECT COUNT(MARI1.result_value)
+    <!-- 전체 건수 + 상담 고객 수 + 만기 고객 수 통합 조회 (쿼리 3~4개 → 1개) -->
+    <select id="selectMstrNonpayListCounts" parameterType="hashmap" resultType="hashmap">
+        SELECT COUNT(*) AS "totalCount"
+            , COUNT(DISTINCT MC.CUST_NUM) AS "customerCount"
+            <if test="taskId[0] == 'TA0003'">
+            , COUNT(MARI1.RESULT_VALUE) AS "extCustomerCount"
+            </if>
         FROM MSTR_CALL MC
         LEFT JOIN MSTR_COUNSELOR MCS
         ON MC.COUNSELOR_CD = MCS.COUNSELOR_CD
